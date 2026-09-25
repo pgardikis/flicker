@@ -12,6 +12,7 @@ It lives in the menu bar as a ⛽ fuel pump icon, checks the battery level in th
 - **Sound**: any macOS system sound, with a preview button and a volume boost up to 4×
 - **Launch at login**
 - **Live battery status**: percentage, charging state and time remaining in the panel
+- **Battery health**: shows macOS's health rating, and flags it when it needs attention
 - **Send Test Warning** button to check your settings
 
 The fuel pump becomes filled with a "!" while the battery is below your threshold.

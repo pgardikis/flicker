@@ -9,6 +9,8 @@ final class BatteryMonitor: ObservableObject {
     @Published private(set) var percent: Int?
     @Published private(set) var onBattery = false
     @Published private(set) var minutesRemaining: Int?
+    @Published private(set) var health: String?
+    @Published private(set) var healthCondition: String?
 
     /// Percentage at the last warning; nil once charging or back above the threshold.
     private var lastWarned: Int?
@@ -36,6 +38,19 @@ final class BatteryMonitor: ObservableObject {
         guard onBattery else { return "Power adapter connected" }
         guard let minutes = minutesRemaining, minutes > 0 else { return "On battery" }
         return "On battery · \(minutes / 60):\(String(format: "%02d", minutes % 60)) remaining"
+    }
+
+    /// nil when macOS reports no health for this battery.
+    var healthText: String? {
+        guard let health else { return nil }
+        guard let healthCondition, !healthCondition.isEmpty else { return "Battery health: \(health)" }
+        return "Battery health: \(health) · \(healthCondition)"
+    }
+
+    var healthNeedsAttention: Bool {
+        if let healthCondition, !healthCondition.isEmpty { return true }
+        guard let health else { return false }
+        return health != kIOPSGoodValue
     }
 
     func start() {
@@ -85,6 +100,8 @@ final class BatteryMonitor: ObservableObject {
             percent = current * 100 / max
             onBattery = desc[kIOPSPowerSourceStateKey] as? String == kIOPSBatteryPowerValue
             minutesRemaining = desc[kIOPSTimeToEmptyKey] as? Int
+            health = desc[kIOPSBatteryHealthKey] as? String
+            healthCondition = desc[kIOPSBatteryHealthConditionKey] as? String
             return
         }
 
@@ -92,6 +109,8 @@ final class BatteryMonitor: ObservableObject {
         percent = nil
         onBattery = false
         minutesRemaining = nil
+        health = nil
+        healthCondition = nil
     }
 
     private func evaluate() {

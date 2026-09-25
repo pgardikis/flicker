@@ -16,6 +16,12 @@ struct SettingsView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             header
+            if let healthText = monitor.healthText {
+                Label(healthText, systemImage: monitor.healthNeedsAttention
+                    ? "exclamationmark.triangle.fill" : "checkmark.seal")
+                    .font(.caption)
+                    .foregroundStyle(monitor.healthNeedsAttention ? .orange : .secondary)
+            }
             Divider()
 
             VStack(alignment: .leading, spacing: 4) {
