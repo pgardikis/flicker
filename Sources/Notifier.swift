@@ -6,6 +6,9 @@ import UserNotifications
 enum Notifier {
     static let soundsDirectory = "/System/Library/Sounds"
 
+    /// Replacing the previous warning instead of stacking a new one in Notification Center.
+    private static let warningIdentifier = "low-battery"
+
     /// True while a modal alert is on screen, so a second warning can't stack another dialog.
     private static var alertShowing = false
 
@@ -67,7 +70,7 @@ enum Notifier {
                     let content = UNMutableNotificationContent()
                     content.title = title
                     content.body = message
-                    UNUserNotificationCenter.current().add(UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil))
+                    UNUserNotificationCenter.current().add(UNNotificationRequest(identifier: warningIdentifier, content: content, trigger: nil))
                 } else {
                     // Permission denied or not yet granted: fall back to AppleScript notifications
                     let process = Process()

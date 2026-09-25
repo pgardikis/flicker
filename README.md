@@ -80,7 +80,7 @@ battery-notify/
 ### Components
 
 - **Battery reading**: `BatteryMonitor` uses macOS's IOKit power source API (`IOPSCopyPowerSourcesInfo`) to get the charge level, whether it's on battery, and time remaining. `IOPSNotificationCreateRunLoopSource` delivers instant updates, and a 60-second timer backs it up.
-- **Notifications**: sent with Apple's `UserNotifications` framework. If notification permission isn't granted, the app falls back to AppleScript's `display notification`.
+- **Notifications**: sent with Apple's `UserNotifications` framework. Each warning reuses one identifier, so a reminder replaces the previous banner instead of stacking. If notification permission isn't granted, the app falls back to AppleScript's `display notification`.
 - **Alerts**: a standard `NSAlert` warning dialog.
 - **Sound**: played with `/usr/bin/afplay` instead of the notification sound. Notification sounds are capped by the system *alert volume*. `afplay` follows your *output volume* and supports a boost multiplier.
 - **Settings**: stored in `UserDefaults` (`~/Library/Preferences/local.batterynotify.plist`).
