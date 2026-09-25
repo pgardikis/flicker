@@ -9,10 +9,11 @@ enum Notifier {
     /// True while a modal alert is on screen, so a second warning can't stack another dialog.
     private static var alertShowing = false
 
-    static var availableSounds: [String] {
+    /// The system sounds directory doesn't change while the app runs, so list it once.
+    static let availableSounds: [String] = {
         let files = (try? FileManager.default.contentsOfDirectory(atPath: soundsDirectory)) ?? []
         return files.filter { $0.hasSuffix(".aiff") }.map { String($0.dropLast(5)) }.sorted()
-    }
+    }()
 
     static func requestPermission() {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
