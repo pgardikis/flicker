@@ -19,6 +19,14 @@ struct BatteryNotifyApp: App {
 
 final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
+        // A second copy means two menu bar icons and duplicate warnings, so the
+        // newcomer steps aside and leaves the already-running one alone.
+        if let bundleID = Bundle.main.bundleIdentifier,
+           NSRunningApplication.runningApplications(withBundleIdentifier: bundleID).count > 1 {
+            NSApp.terminate(nil)
+            return
+        }
+
         Settings.registerDefaults()
         UNUserNotificationCenter.current().delegate = self
         Notifier.requestPermission()

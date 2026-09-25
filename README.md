@@ -37,7 +37,7 @@ On first launch:
 - macOS asks to **allow notifications** for Battery Notify. Click Allow.
 - The app turns on **launch at login**, and macOS may show a "Background item added" notice.
 
-Always run the app from `/Applications`. Opening the copy in `build/` as well starts a second instance, which means two icons and duplicate warnings.
+Always run the app from `/Applications`. If a second copy is opened (say the one in `build/`), it notices the running instance and quits immediately, so you won't get two icons or duplicate warnings.
 
 ## Settings
 
@@ -148,7 +148,7 @@ Expected, and not fixable on an ad-hoc build. Breaking through Focus needs the t
 Increase Volume in the panel. It's relative to your speaker volume, so turn that up too. Values above about 4× tend to distort.
 
 **Two fuel pump icons in the menu bar**
-Two copies are running, usually one from `build/` and one from `/Applications`. Quit both, then open only `/Applications/Battery Notify.app`. Check with:
+Shouldn't happen any more: a second copy quits itself at launch. If you ever do see two, check which copies are running with:
 ```bash
 ps -axo pid,command | grep "[B]atteryNotify"
 ```
