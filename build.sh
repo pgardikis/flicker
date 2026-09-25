@@ -9,9 +9,14 @@ APP="$BUILD/Battery Notify.app"
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 
-echo "Compiling..."
-swiftc -O -parse-as-library -swift-version 5 -target arm64-apple-macos14.0 \
-  Sources/*.swift -o "$APP/Contents/MacOS/BatteryNotify"
+echo "Compiling (universal: arm64 + x86_64)..."
+for arch in arm64 x86_64; do
+  swiftc -O -parse-as-library -swift-version 6 -target "$arch-apple-macos14.0" \
+    Sources/*.swift -o "$BUILD/BatteryNotify-$arch"
+done
+lipo -create "$BUILD/BatteryNotify-arm64" "$BUILD/BatteryNotify-x86_64" \
+  -output "$APP/Contents/MacOS/BatteryNotify"
+rm -f "$BUILD/BatteryNotify-arm64" "$BUILD/BatteryNotify-x86_64"
 
 echo "Making icon..."
 swiftc -O make-icon.swift -o "$BUILD/make-icon"

@@ -20,7 +20,7 @@ The fuel pump becomes filled with a "!" while the battery is below your threshol
 ## Requirements
 
 - macOS 14 (Sonoma) or later
-- Apple Silicon Mac (the build targets `arm64`)
+- Any Intel or Apple Silicon Mac (the build is universal)
 - Xcode Command Line Tools for the Swift compiler: `xcode-select --install`
 
 You don't need the full Xcode app.
@@ -92,7 +92,7 @@ battery-notify/
 
 A `.app` is a folder with a fixed layout. Without Xcode, the script builds it by hand:
 
-1. Compiles `Sources/*.swift` with `swiftc` into `Battery Notify.app/Contents/MacOS/BatteryNotify`
+1. Compiles `Sources/*.swift` with `swiftc` once per architecture, then merges them with `lipo` into a universal `Battery Notify.app/Contents/MacOS/BatteryNotify`
 2. Draws the icon with `make-icon.swift`, then converts it to `AppIcon.icns` with `iconutil`
 3. Copies `Info.plist` into the bundle
 4. Signs the app with an ad-hoc signature and **hardened runtime** (`codesign --options runtime --sign -`). macOS requires a signature before an app can send notifications or launch at login.
