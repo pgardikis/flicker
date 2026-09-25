@@ -62,8 +62,8 @@ struct SettingsView: View {
             }
             .disabled(sound.isEmpty)
 
-            Toggle("Launch at login", isOn: $launchAtLogin)
-                .onChange(of: launchAtLogin) { _, enabled in setLaunchAtLogin(enabled) }
+            // An explicit binding, so re-reading the status in onAppear can't re-trigger a write
+            Toggle("Launch at login", isOn: Binding(get: { launchAtLogin }, set: { setLaunchAtLogin($0) }))
             if let loginError {
                 Text(loginError).font(.caption).foregroundStyle(.red)
             }
@@ -78,7 +78,11 @@ struct SettingsView: View {
         }
         .padding()
         .frame(width: 300)
-        .onAppear { monitor.refresh() }
+        .onAppear {
+            monitor.refresh()
+            // System Settings can change this behind our back, so re-read on every open
+            launchAtLogin = SMAppService.mainApp.status == .enabled
+        }
     }
 
     private var header: some View {
@@ -103,7 +107,8 @@ struct SettingsView: View {
             loginError = nil
         } catch {
             loginError = error.localizedDescription
-            launchAtLogin = SMAppService.mainApp.status == .enabled
         }
+        // Show what macOS actually did, not what was asked for
+        launchAtLogin = SMAppService.mainApp.status == .enabled
     }
 }
