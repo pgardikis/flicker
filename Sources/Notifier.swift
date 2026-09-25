@@ -6,6 +6,9 @@ import UserNotifications
 enum Notifier {
     static let soundsDirectory = "/System/Library/Sounds"
 
+    /// True while a modal alert is on screen, so a second warning can't stack another dialog.
+    private static var alertShowing = false
+
     static var availableSounds: [String] {
         let files = (try? FileManager.default.contentsOfDirectory(atPath: soundsDirectory)) ?? []
         return files.filter { $0.hasSuffix(".aiff") }.map { String($0.dropLast(5)) }.sorted()
@@ -42,6 +45,11 @@ enum Notifier {
     }
 
     private static func showAlert(title: String, message: String) {
+        // runModal blocks here, so a warning arriving meanwhile must not open a second dialog
+        guard !alertShowing else { return }
+        alertShowing = true
+        defer { alertShowing = false }
+
         NSApp.activate(ignoringOtherApps: true)
         let alert = NSAlert()
         alert.alertStyle = .warning

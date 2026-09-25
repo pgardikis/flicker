@@ -48,13 +48,16 @@ final class BatteryMonitor: ObservableObject {
             let monitor = Unmanaged<BatteryMonitor>.fromOpaque(context).takeUnretainedValue()
             MainActor.assumeIsolated { monitor.refresh() }
         }, context)?.takeRetainedValue() {
-            CFRunLoopAddSource(CFRunLoopGetMain(), source, .defaultMode)
+            // Common modes, so updates keep arriving while a modal alert or menu is up
+            CFRunLoopAddSource(CFRunLoopGetMain(), source, .commonModes)
         }
 
         // Fallback poll, also picks up settings changes
-        timer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { _ in
+        let timer = Timer(timeInterval: 60, repeats: true) { _ in
             MainActor.assumeIsolated { BatteryMonitor.shared.refresh() }
         }
+        RunLoop.main.add(timer, forMode: .common)
+        self.timer = timer
     }
 
     func refresh() {
