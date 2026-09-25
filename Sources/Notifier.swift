@@ -70,6 +70,14 @@ enum Notifier {
                     let content = UNMutableNotificationContent()
                     content.title = title
                     content.body = message
+                    // A low battery is worth breaking through Focus / Do Not Disturb, but
+                    // macOS honours this only with the com.apple.developer.usernotifications
+                    // .time-sensitive entitlement, which needs a provisioning profile from a
+                    // paid Developer ID. Ad-hoc signing can't have it: embedding it anyway
+                    // makes AMFI refuse to launch the app. So this is a no-op on an ad-hoc
+                    // build, kept for when the app is signed properly. Use Style = Alert to
+                    // get a warning that Focus cannot suppress.
+                    content.interruptionLevel = .timeSensitive
                     UNUserNotificationCenter.current().add(UNNotificationRequest(identifier: warningIdentifier, content: content, trigger: nil))
                 } else {
                     // Permission denied or not yet granted: fall back to AppleScript notifications

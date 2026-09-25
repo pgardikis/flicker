@@ -80,7 +80,7 @@ battery-notify/
 ### Components
 
 - **Battery reading**: `BatteryMonitor` uses macOS's IOKit power source API (`IOPSCopyPowerSourcesInfo`) to get the charge level, whether it's on battery, and time remaining. `IOPSNotificationCreateRunLoopSource` delivers instant updates, and a 60-second timer backs it up.
-- **Notifications**: sent with Apple's `UserNotifications` framework. Each warning reuses one identifier, so a reminder replaces the previous banner instead of stacking. If notification permission isn't granted, the app falls back to AppleScript's `display notification`.
+- **Notifications**: sent with Apple's `UserNotifications` framework. Each warning reuses one identifier, so a reminder replaces the previous banner instead of stacking. If notification permission isn't granted, the app falls back to AppleScript's `display notification`. The code asks for a *time sensitive* interruption level, but macOS ignores that without a Developer ID (see Known limits), so notifications are suppressed by Focus.
 - **Alerts**: a standard `NSAlert` warning dialog.
 - **Sound**: played with `/usr/bin/afplay` instead of the notification sound. Notification sounds are capped by the system *alert volume*. `afplay` follows your *output volume* and supports a boost multiplier.
 - **Settings**: stored in `UserDefaults` (`~/Library/Preferences/local.batterynotify.plist`).
@@ -133,12 +133,16 @@ Hardening in place:
 Known limits:
 
 - **Ad-hoc signed**: the app works only on the Mac that built it. Sharing it with others needs a paid Apple Developer ID and notarization.
+- **No entitlements, so Focus wins**: `com.apple.developer.usernotifications.time-sensitive` would let low battery warnings pierce Focus, but it has to be authorised by a provisioning profile, which needs a paid Developer ID. Embedding it in an ad-hoc signature anyway makes AMFI refuse to launch the app (`Launchd job spawn failed`, POSIX 163). Use **Style = Alert** instead.
 - **Not sandboxed**: fine for a personal tool, since the sandbox would complicate launching `afplay`.
 
 ## Troubleshooting
 
 **No notification appears**
-Allow notifications for Battery Notify in System Settings → Notifications. Turn off Focus / Do Not Disturb. Use **Send Test Warning** to check. Or switch Style to **Alert**, which doesn't need notification permission.
+Allow notifications for Battery Notify in System Settings → Notifications. Use **Send Test Warning** to check.
+
+**Nothing appears while Focus / Do Not Disturb is on**
+Expected, and not fixable on an ad-hoc build. Breaking through Focus needs the time-sensitive entitlement, which requires a paid Developer ID (see Known limits). Switch **Style** to **Alert**: an `NSAlert` doesn't go through the notification system, so Focus can't suppress it. The warning sound still plays either way, since it's played directly with `afplay`.
 
 **Sound too quiet**
 Increase Volume in the panel. It's relative to your speaker volume, so turn that up too. Values above about 4× tend to distort.
