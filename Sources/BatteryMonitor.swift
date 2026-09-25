@@ -77,6 +77,7 @@ final class BatteryMonitor: ObservableObject {
         for source in sources {
             guard let desc = IOPSGetPowerSourceDescription(info, source)?.takeUnretainedValue() as? [String: Any],
                   desc[kIOPSTypeKey] as? String == kIOPSInternalBatteryType,
+                  desc[kIOPSIsPresentKey] as? Bool != false,
                   let current = desc[kIOPSCurrentCapacityKey] as? Int,
                   let max = desc[kIOPSMaxCapacityKey] as? Int, max > 0
             else { continue }
@@ -86,7 +87,11 @@ final class BatteryMonitor: ObservableObject {
             minutesRemaining = desc[kIOPSTimeToEmptyKey] as? Int
             return
         }
+
+        // No usable battery: clear everything, so nothing stale is left behind
         percent = nil
+        onBattery = false
+        minutesRemaining = nil
     }
 
     private func evaluate() {
