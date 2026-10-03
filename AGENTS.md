@@ -27,10 +27,10 @@ A macOS 14+ menu bar app (SwiftUI `MenuBarExtra`, no Dock icon via `LSUIElement`
 
 ## Constraints to preserve
 
-- **Ad-hoc signing with hardened runtime** (`codesign --options runtime --sign -`) is required for notifications and launch at login. Do **not** add entitlements such as `com.apple.developer.usernotifications.time-sensitive`. They need a paid Developer ID provisioning profile, and in an ad-hoc signature they make AMFI refuse to launch the app (POSIX 163). `interruptionLevel = .timeSensitive` is deliberately left in the code even though it has no effect on this build.
+- **Ad-hoc signing with hardened runtime** (`codesign --options runtime --sign -`) is required for notifications and launch at login. Do **not** add entitlements such as `com.apple.developer.usernotifications.time-sensitive`. They need a provisioning profile from a paid Apple Developer Program membership, and in an ad-hoc signature they make AMFI refuse to launch the app (POSIX 163). `interruptionLevel = .timeSensitive` is deliberately left in the code even though it has no effect on this build.
 - **Security hardening**: `playSound` only plays names listed in `Notifier.availableSounds` (from `/System/Library/Sounds`). The `osascript` fallback passes the title and message as `argv` and never interpolates them into the script text. Keep both.
 - The app has no network access, no sandbox and no privileges. Keep it that way.
-- `README.md` documents the settings, behavior and build steps in detail. Update it when behavior changes.
+- `README.md` is the user-facing overview (features, install, settings, troubleshooting) and is kept short. Technical detail (components, `build.sh`, file locations, security) lives in `docs/HOW-IT-WORKS.md`. Update whichever applies when behavior changes, and the screenshots in `docs/images/` when the UI changes.
 
 ## Commit messages
 
