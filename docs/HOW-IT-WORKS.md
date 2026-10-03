@@ -16,7 +16,7 @@ flicker/
 │   └── Settings.swift             Setting keys and defaults
 ├── docs/                          This file, the screenshots and the scripts that make them
 ├── build/                         Created by build.sh, not stored in git
-├── Info.plist                     App metadata (menu bar only, no Dock icon)
+├── Info.plist                     App metadata (menu bar only by default)
 ├── make-icon.swift                Draws the app icon
 ├── build.sh                       Build, sign and install script
 ├── README.md                      Install and usage
@@ -68,7 +68,7 @@ A `.app` is a folder with a fixed layout. Without Xcode, the script builds it by
 
 ## Screenshots
 
-`docs/images/update-screenshots.sh` re-renders the panel images straight from `PanelView` at 3x and rebuilds `screenshots.png` with `compose.swift`, which enlarges the panel to the Settings window's width. The Settings window images are real captures, since a window drawn by a background process renders its controls as inactive: capture the window while it's active, crop it to the window, and run the script again.
+`docs/images/update-screenshots.sh` re-renders the panel images straight from `PanelView` at 3x and rebuilds `screenshots.png` with `compose.swift`, which enlarges the panel to the Settings window's width. The Settings window images are real captures, since a window drawn by a background process renders its controls as inactive.
 
 ## Where the app keeps things
 
