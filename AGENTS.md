@@ -1,0 +1,33 @@
+# AGENTS.md
+
+This file provides guidance to AI coding agents working with code in this repository.
+
+## Overview
+
+A macOS 14+ menu bar app (SwiftUI `MenuBarExtra`, no Dock icon via `LSUIElement`) that warns when the battery drops below a user-set threshold. There is no Xcode project or Swift package: the `.app` bundle is assembled by hand in `build.sh` using only the Command Line Tools.
+
+## Commands
+
+```bash
+./build.sh            # build universal app → build/Battery Notify.app
+./build.sh --install  # build, quit running copy, replace /Applications/Battery Notify.app, relaunch
+```
+
+- The compiler runs in **Swift 6 language mode** (`-swift-version 6`) with `-parse-as-library`, once per arch (arm64, x86_64), then merged with `lipo`. Strict concurrency errors will fail the build.
+- There are no tests and no linter. Verify changes by building, installing, and using the panel's **Send Test Warning** button.
+- Run the app from `/Applications`. A second running copy (for example the one in `build/`) detects the first by bundle ID and quits itself at launch.
+
+## Architecture
+
+- `BatteryNotifyApp.swift`: `@main` app plus `AppDelegate`. The delegate enforces a single instance, registers defaults, requests notification permission, turns on launch at login the first time (`SMAppService`, guarded by `didSetupLoginItem`), and starts the monitor.
+- `BatteryMonitor` (`@MainActor` singleton, `ObservableObject`): reads the internal battery through IOKit (`IOPSCopyPowerSourcesInfo`) and holds all the warning logic. Updates arrive from an `IOPSNotificationCreateRunLoopSource` callback plus a 60 s `Timer`. Both are added in **common run loop modes** so they keep firing while a modal `NSAlert` or the menu is open. The C callback gets back to the instance with `Unmanaged` and `MainActor.assumeIsolated`.
+- Warning logic in `evaluate()`: warn only when on battery and below threshold. `lastWarned` stores the percentage at the last warning. A reminder fires after each further `remindEvery` drop (`0` means warn once). Charging or going back above the threshold resets `lastWarned` to nil. If no battery is found, every published field is cleared.
+- `Notifier`: plays the sound itself through `/usr/bin/afplay`, so volume follows the output volume and can be boosted. It then shows either an `NSAlert` (guarded by `alertShowing`, since `runModal` blocks) or a `UNUserNotification` with the fixed identifier `low-battery`, so each reminder replaces the last banner. If notification permission is missing, it falls back to `osascript`.
+- `Settings`: the `UserDefaults` keys and defaults. `SettingsView` binds to the same keys with `@AppStorage`, and the monitor reads them through `Settings.*`. Add any new setting in both places. The 60 s timer is also how setting changes reach the warning logic.
+
+## Constraints to preserve
+
+- **Ad-hoc signing with hardened runtime** (`codesign --options runtime --sign -`) is required for notifications and launch at login. Do **not** add entitlements such as `com.apple.developer.usernotifications.time-sensitive`. They need a paid Developer ID provisioning profile, and in an ad-hoc signature they make AMFI refuse to launch the app (POSIX 163). `interruptionLevel = .timeSensitive` is deliberately left in the code even though it has no effect on this build.
+- **Security hardening**: `playSound` only plays names listed in `Notifier.availableSounds` (from `/System/Library/Sounds`). The `osascript` fallback passes the title and message as `argv` and never interpolates them into the script text. Keep both.
+- The app has no network access, no sandbox and no privileges. Keep it that way.
+- `README.md` documents the settings, behavior and build steps in detail. Update it when behavior changes.
