@@ -4,7 +4,7 @@ A lightweight macOS menu bar app for low battery warnings at the level you choos
 
 macOS only warns when the battery is nearly empty, at a level you can't change, with a notification that's easy to miss. Flicker warns earlier, keeps warning as the battery drops, and plays a sound loud enough to notice.
 
-![Flicker in light and dark mode. Top row: the menu bar icon, normal, low battery (with an exclamation mark) and muted (crossed out). Middle row: the menu bar panel, showing 64% on battery with 3:00 remaining, battery health Normal, maximum capacity 80% and 1,054 cycles, a summary of the warning settings, and Settings, Test and Quit buttons. Bottom row: the Settings window, with Warnings (warn below 40%, critical level 10%, remind every 5% drop), Alert (notification style, Sosumi sound, 300% volume) and General (show in Dock, percentage in menu bar, launch at login) sections.](docs/images/screenshots.png)
+![Flicker in light and dark mode. Top row: the menu bar icon, normal, low battery (with an exclamation mark) and muted (crossed out). Middle row: the menu bar panel, showing 58% on battery with 2:14 remaining, battery health Normal, maximum capacity 80% and 1,054 cycles, a summary of the warning settings, and Settings and Quit buttons. Bottom row: the Settings window, with Warnings (warn below 40%, critical level 10%, remind every 5% drop), Alert (notification style, Sosumi sound, 300% volume, test warning) and General (show in Dock, percentage in menu bar, launch at login) sections.](docs/images/screenshots.png)
 
 ## Features
 
@@ -34,7 +34,7 @@ The app isn't notarized, so build it on each Mac you want to use it on. Run `./b
 
 ## Usage
 
-Click the charging station icon in the menu bar to open the panel. It shows the battery, its health and a summary of your warnings. **Test** sends a test warning, and the bell mutes warnings. **Settings…** opens the Settings window, where changes apply straight away.
+Click the charging station icon in the menu bar to open the panel. It shows the battery, its health and a summary of your warnings. The bell mutes warnings. **Settings…** opens the Settings window, where changes apply straight away and **Test warning** sends a warning with your current style and sound.
 
 | Setting | Default | Options | What it does |
 |---|---|---|---|
@@ -64,7 +64,7 @@ The menu bar icon fills with a "!" while the battery is low, and is crossed out 
 
 ## Troubleshooting
 
-**No notification appears.** Allow notifications for Flicker in System Settings → Notifications, then try the panel's **Test** button.
+**No notification appears.** Allow notifications for Flicker in System Settings → Notifications, then use **Test warning** in Settings.
 
 **Nothing appears during Focus or Do Not Disturb.** Letting notifications through Focus needs an entitlement that only a paid Apple Developer Program membership can provide. Set **Style** to **Alert** instead: alerts aren't affected by Focus. Critical warnings are always alerts.
 

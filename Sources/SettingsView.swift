@@ -95,6 +95,18 @@ struct SettingsView: View {
                 }
                 .help("Relative to your speaker volume: 100% plays at the speaker volume")
                 .disabled(sound.isEmpty)
+
+                LabeledContent("Test warning") {
+                    Menu("Send") {
+                        Button("Low Battery") { monitor.sendTest() }
+                        Button("Critical") { monitor.sendTest(critical: true) }
+                            .disabled(critical == 0 || critical >= threshold)
+                    } primaryAction: {
+                        monitor.sendTest()
+                    }
+                    .fixedSize()
+                }
+                .help("Sends a warning with the current style and sound")
             }
 
             Section("General") {

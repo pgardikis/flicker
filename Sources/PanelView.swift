@@ -46,16 +46,6 @@ struct PanelView: View {
             HStack {
                 Button("Settings…") { showSettings() }
                 Spacer()
-                Menu("Test") {
-                    Button("Low Battery") { monitor.sendTest() }
-                    Button("Critical") { monitor.sendTest(critical: true) }
-                        .disabled(effectiveCritical == 0)
-                } primaryAction: {
-                    monitor.sendTest()
-                }
-                .fixedSize()
-                .help("Send a test warning")
-                Spacer()
                 Button("Quit") { NSApp.terminate(nil) }
             }
         }

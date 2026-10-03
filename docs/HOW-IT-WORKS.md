@@ -36,7 +36,7 @@ flicker/
 - **Mute holds warnings back without losing them.** While muted, a non-critical warning is skipped before the remembered percentage is updated. When the mute ends, the app re-evaluates straight away, so a warning that came due meanwhile fires then. A mute ends when its timer runs out, when you click Unmute, or when you plug in, and it's kept in memory only, so quitting the app clears it.
 - **One alert at a time.** An alert waits for you to click OK. A warning that arrives while one is open still plays its sound, but its dialog is dropped rather than shown afterwards, so dialogs never stack.
 
-Test warnings from the panel ignore all of this and always fire.
+Test warnings from Settings ignore all of this and always fire.
 
 ## Implementation notes
 
