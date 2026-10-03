@@ -7,7 +7,8 @@ The technical side of the app: how it reads the battery, how it decides when to 
 ```
 flicker/
 ├── Sources/
-│   ├── FlickerApp.swift           App entry, menu bar icon, launch at login, notification setup
+│   ├── FlickerApp.swift           App entry, launch at login, notification setup
+│   ├── MenuBarLabel.swift         The menu bar icon and its states
 │   ├── DockIcon.swift             The optional Dock icon and opening the panel from it
 │   ├── BatteryMonitor.swift       Reads the battery and decides when to warn
 │   ├── Notifier.swift             Shows notifications and alerts, plays sounds
@@ -68,7 +69,7 @@ A `.app` is a folder with a fixed layout. Without Xcode, the script builds it by
 
 ## Screenshots
 
-`docs/images/update-screenshots.sh` re-renders the panel images straight from `PanelView` at 3x and rebuilds `screenshots.png` with `compose.swift`, which enlarges the panel to the Settings window's width. The Settings window images are real captures, since a window drawn by a background process renders its controls as inactive.
+`docs/images/update-screenshots.sh` re-renders the panel images straight from `PanelView` at 3x and rebuilds `screenshots.png` with `compose.swift`, which enlarges the panel to the Settings window's width. It also draws the menu bar icon's states from `MenuBarLabel`, enlarged the same way. The Settings window images are real captures, since a window drawn by a background process renders its controls as inactive.
 
 ## Where the app keeps things
 

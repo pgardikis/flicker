@@ -1,5 +1,6 @@
 #!/bin/bash
-# Re-renders the panel screenshots from the app's own code and rebuilds screenshots.png.
+# Re-renders the panel and menu bar icon images from the app's own code, and rebuilds
+# screenshots.png.
 # The Settings window images, settings-light.png and settings-dark.png, are real captures of an
 # active window, since a window drawn by this script would look inactive; it leaves them as they are.
 set -e

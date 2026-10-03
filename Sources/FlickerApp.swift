@@ -12,13 +12,8 @@ struct FlickerApp: App {
         MenuBarExtra {
             PanelView().environmentObject(monitor)
         } label: {
-            HStack {
-                Image(systemName: monitor.isMuted ? "ev.charger.slash"
-                    : monitor.isLow ? "ev.charger.exclamationmark.fill" : "ev.charger")
-                if showPercent, let percent = monitor.percent {
-                    Text("\(percent)%")
-                }
-            }
+            MenuBarLabel(isLow: monitor.isLow, isMuted: monitor.isMuted,
+                         percent: showPercent ? monitor.percent : nil)
         }
         .menuBarExtraStyle(.window)
 

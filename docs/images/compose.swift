@@ -1,5 +1,5 @@
-// Combines the four screenshots into screenshots.png for the README: Light and Dark across the
-// top, Menu bar panel and Settings window down the side. Run by update-screenshots.sh from the
+// Combines the screenshots into screenshots.png for the README: Light and Dark across the top,
+// Menu bar icon, Menu bar panel and Settings window down the side. Run by update-screenshots.sh from the
 // repo root.
 import AppKit
 
@@ -10,8 +10,9 @@ func load(_ name: String) -> NSImage {
     guard let rep = NSBitmapImageRep(data: try! Data(contentsOf: URL(fileURLWithPath: "\(dir)/\(name).png"))) else {
         fatalError("can't read \(name).png")
     }
-    // Size in points: the panel shots are rendered at 3x, the Settings captures at 1x
-    let pixelsPerPoint: CGFloat = name.hasPrefix("panel") ? 3 : 1
+    // Size in points: the panel shots are rendered at 3x, the menu bar strip at 4x, the Settings
+    // captures at 1x
+    let pixelsPerPoint: CGFloat = name.hasPrefix("panel") ? 3 : name.hasPrefix("menubar") ? 4 : 1
     let image = NSImage(size: CGSize(width: CGFloat(rep.pixelsWide) / pixelsPerPoint,
                                      height: CGFloat(rep.pixelsHigh) / pixelsPerPoint))
     image.addRepresentation(rep)
@@ -24,10 +25,11 @@ func fit(_ image: NSImage, width: CGFloat) -> NSImage {
     return image
 }
 
-// The panel is the part people see most but is narrower than the Settings window, so it's
-// enlarged to the same width; that's why it's rendered at 3x.
+// The panel and the menu bar strip are narrower than the Settings window, so they're enlarged to
+// the same width; that's why they're rendered at 3x and 4x.
 let settingsWidth = load("settings-light").size.width
 let rows: [(label: String, light: NSImage, dark: NSImage)] = [
+    ("Menu bar icon", fit(load("menubar-light"), width: settingsWidth), fit(load("menubar-dark"), width: settingsWidth)),
     ("Menu bar panel", fit(load("panel-light"), width: settingsWidth), fit(load("panel-dark"), width: settingsWidth)),
     ("Settings window", load("settings-light"), load("settings-dark")),
 ]

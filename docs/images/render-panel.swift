@@ -1,6 +1,7 @@
 // Renders the menu bar panel to panel-light.png and panel-dark.png at 3x, straight from the app's
-// own PanelView. Built and run by update-screenshots.sh; it shows the battery as it is right now,
-// with default settings.
+// own PanelView, and the menu bar icon's states to menubar-light.png and menubar-dark.png at 4x from
+// MenuBarLabel. Built and run by update-screenshots.sh; the panel shows the battery as it is right
+// now, with default settings.
 import AppKit
 import SwiftUI
 
@@ -36,10 +37,15 @@ enum RenderPanel {
                 .environmentObject(BatteryMonitor.shared)
             render(panel, dark: dark, to: "\(outputDirectory)/panel-\(dark ? "dark" : "light").png")
         }
+        // Small, so compose.swift enlarges it to the Settings window's width; hence 4x
+        for dark in [false, true] {
+            render(MenuBarStates(dark: dark), dark: dark, scale: 4,
+                   to: "\(outputDirectory)/menubar-\(dark ? "dark" : "light").png")
+        }
     }
 
     @MainActor
-    static func render<V: View>(_ view: V, dark: Bool, to path: String) {
+    static func render<V: View>(_ view: V, dark: Bool, scale: Int = 3, to path: String) {
         let hosting = NSHostingView(rootView: view)
         let size = hosting.fittingSize
         let window = ActiveWindow(contentRect: CGRect(origin: .zero, size: size), styleMask: [.borderless],
@@ -52,7 +58,6 @@ enum RenderPanel {
         window.orderFront(nil)
         RunLoop.main.run(until: Date().addingTimeInterval(0.5))
 
-        let scale = 3
         let bounds = hosting.bounds
         let rep = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: Int(bounds.width) * scale,
                                    pixelsHigh: Int(bounds.height) * scale, bitsPerSample: 8, samplesPerPixel: 4,
@@ -63,5 +68,44 @@ enum RenderPanel {
         try! rep.representation(using: .png, properties: [:])!.write(to: URL(fileURLWithPath: path))
         window.orderOut(nil)
         print("Wrote \(path), \(rep.pixelsWide) × \(rep.pixelsHigh)")
+    }
+}
+
+/// A menu bar showing the icon in each state, captioned underneath. The captions use the same ink
+/// as screenshots.png's labels, since the composite's card is light in both columns.
+struct MenuBarStates: View {
+    let dark: Bool
+    private let states: [(caption: String, isLow: Bool, isMuted: Bool)] = [
+        ("Normal", false, false), ("Low battery", true, false), ("Muted", false, true),
+    ]
+    private let ink = Color(red: 0.11, green: 0.114, blue: 0.13)
+
+    var body: some View {
+        VStack(spacing: 6) {
+            HStack(spacing: 0) {
+                ForEach(states, id: \.caption) { state in
+                    MenuBarLabel(isLow: state.isLow, isMuted: state.isMuted, percent: nil)
+                        .font(Font(NSFont.menuBarFont(ofSize: 0)))
+                        .frame(maxWidth: .infinity)
+                }
+            }
+            .frame(height: 24)
+            .background(dark ? Color(white: 0.13) : Color(white: 0.97))
+            .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 6, style: .continuous).strokeBorder(.separator, lineWidth: 0.5))
+            HStack(spacing: 0) {
+                ForEach(states, id: \.caption) { state in
+                    Text(state.caption).font(.system(size: 10, weight: .medium)).foregroundStyle(ink)
+                        .frame(maxWidth: .infinity)
+                }
+            }
+        }
+        .frame(width: 240)
+        .padding(.top, 4)
+        // Extra room below, so the gap to the panel matches the one between the panel and Settings
+        .padding(.bottom, 18)
+        // The panel image has 24 pt of shadow margin around a 300 pt panel; the same proportion here
+        // lines the strip up with the panel once compose.swift enlarges both to one width
+        .padding(.horizontal, 240 * 24 / 300)
     }
 }
