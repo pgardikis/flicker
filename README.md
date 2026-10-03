@@ -4,10 +4,7 @@ A lightweight macOS menu bar app that warns you when your MacBook's battery runs
 
 macOS only warns once, at a level it picks. Battery Notifier warns at the level you choose, reminds you as the battery keeps dropping, plays a sound loud enough to notice, and can show alerts that get through Focus.
 
-| | Light | Dark |
-|---|---|---|
-| **Menu bar panel** | <img src="docs/images/panel-light.png" width="300" alt="Battery Notifier panel in light mode"> | <img src="docs/images/panel-dark.png" width="300" alt="Battery Notifier panel in dark mode"> |
-| **Settings window** | <img src="docs/images/settings-light.png" width="300" alt="Settings window in light mode"> | <img src="docs/images/settings-dark.png" width="300" alt="Settings window in dark mode"> |
+![Battery Notifier in light and dark mode. Top row: the menu bar panel, showing 67% and charging with 1:24 until full, battery health Normal, maximum capacity 80% and 1,054 cycles, a summary of the warning settings, and Settings, Test and Quit buttons. Bottom row: the Settings window, with Warnings (warn below 40%, critical level 10%, remind every 5% drop), Alert (notification style, Sosumi sound, 300% volume) and General (percentage in menu bar, launch at login) sections.](docs/images/screenshots.png)
 
 ## Features
 

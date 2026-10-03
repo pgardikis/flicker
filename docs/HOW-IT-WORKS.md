@@ -13,7 +13,7 @@ battery-notifier-macos/
 │   ├── PanelView.swift            The menu bar panel: status, health and a settings summary
 │   ├── SettingsView.swift         The Settings window
 │   └── Settings.swift             Setting keys and defaults
-├── docs/                          This file and the README's screenshots
+├── docs/                          This file, the screenshots and compose.swift
 ├── build/                         Created by build.sh, not stored in git
 ├── Info.plist                     App metadata (menu bar only, no Dock icon)
 ├── make-icon.swift                Draws the app icon
