@@ -78,8 +78,8 @@ struct PanelView: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
             Spacer(minLength: 0)
-            // Icon only, so the status text beside it isn't truncated. A plain bell while warnings
-            // are on, so it never looks muted when it isn't; a filled, tinted slashed bell while muted
+            // Icon only, so the status text beside it isn't truncated. A bell while warnings are on;
+            // while muted, the bell is slashed and tinted orange, so the two never look alike
             Menu {
                 if monitor.isMuted {
                     Button("Unmute") { monitor.unmute() }
@@ -106,7 +106,7 @@ struct PanelView: View {
         guard monitor.isMuted,
               let image = NSImage(systemSymbolName: "bell.slash.fill", accessibilityDescription: "Muted")?
                 .withSymbolConfiguration(.init(paletteColors: [.systemOrange]))
-        else { return Image(systemName: "bell") }
+        else { return Image(systemName: "bell.fill") }
         image.isTemplate = false
         return Image(nsImage: image)
     }
