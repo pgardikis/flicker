@@ -86,8 +86,8 @@ enum Notifier {
                     // .time-sensitive entitlement, which needs a provisioning profile from a
                     // paid Developer ID. Ad-hoc signing can't have it: embedding it anyway
                     // makes AMFI refuse to launch the app. So this is a no-op on an ad-hoc
-                    // build, kept for when the app is signed properly. Use Style = Alert to
-                    // get a warning that Focus cannot suppress.
+                    // build, kept for when the app is signed properly. Style = Alert gives a
+                    // warning that Focus cannot suppress.
                     content.interruptionLevel = .timeSensitive
                     UNUserNotificationCenter.current().add(UNNotificationRequest(identifier: warningIdentifier, content: content, trigger: nil))
                 } else {

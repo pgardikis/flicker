@@ -1,6 +1,6 @@
 // Combines the four screenshots into screenshots.png for the README: Light and Dark across the
-// top, Menu bar panel and Settings window down the side. Run from the repo root after replacing
-// any of them:  swift docs/images/compose.swift
+// top, Menu bar panel and Settings window down the side. Run by update-screenshots.sh from the
+// repo root.
 import AppKit
 
 let dir = "docs/images"

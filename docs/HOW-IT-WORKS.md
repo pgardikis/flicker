@@ -49,7 +49,7 @@ Test warnings from the panel ignore all of this and always fire.
 - **Settings**: stored in `UserDefaults` (`~/Library/Preferences/io.github.pgardikis.flicker.plist`).
 - **Settings window placement**: it reopens where you left it, as macOS windows do, but only if that spot is on the screen whose menu bar you clicked. Otherwise (the first time, another display, or one that's been disconnected) it opens centred on that screen.
 - **Launch at login**: registered with `SMAppService.mainApp`.
-- **Single instance**: a second copy (say the one in `build/`) sees the running one by bundle ID and quits at launch, so there are never two icons or duplicate warnings. Run the app from `/Applications`.
+- **Single instance**: a second copy (say the one in `build/`) sees the running one by bundle ID and quits at launch, so there are never two icons or duplicate warnings.
 - **Menu bar only by default**: `LSUIElement` in `Info.plist` hides the Dock icon and app menu.
 - **Optional Dock icon**: *Show in Dock* switches the app's activation policy between regular and accessory, so the icon appears or disappears without a relaunch, along with the ⌘Tab entry and the app menu. SwiftUI's menu bar item has no API to open its panel, so a click on the Dock icon finds the app's own menu bar icon and clicks it. That relies on AppKit's private `NSStatusBarWindow` class name; if the icon can't be found, the click opens Settings instead, through the app menu's Settings… item.
 
@@ -101,6 +101,6 @@ What it does on your Mac:
 
 ### Known limits
 
-- **Ad-hoc signed, not notarized**: a copy built on one Mac and moved to another is usually blocked by Gatekeeper, which checks apps that arrive with macOS's download flag (downloaded, AirDropped or emailed), so build it on each Mac. Distributing a ready-built app needs a paid Apple Developer Program membership, a Developer ID certificate and notarization.
-- **No entitlements, so Focus wins**: `com.apple.developer.usernotifications.time-sensitive` would let low battery warnings pierce Focus, but it has to be authorised by a provisioning profile, which needs a paid Apple Developer Program membership. Embedding it in an ad-hoc signature anyway makes AMFI (Apple Mobile File Integrity) refuse to launch the app (`Launchd job spawn failed`, POSIX 163). Use **Style = Alert** instead.
+- **Ad-hoc signed, not notarized**: a copy built on one Mac and moved to another is usually blocked by Gatekeeper, which checks apps that arrive with macOS's download flag (downloaded, AirDropped or emailed), so the app is built on each Mac that runs it. Distributing a ready-built app needs a paid Apple Developer Program membership, a Developer ID certificate and notarization.
+- **No entitlements, so Focus wins**: `com.apple.developer.usernotifications.time-sensitive` would let low battery warnings pierce Focus, but it has to be authorised by a provisioning profile, which needs a paid Apple Developer Program membership. Embedding it in an ad-hoc signature anyway makes AMFI (Apple Mobile File Integrity) refuse to launch the app (`Launchd job spawn failed`, POSIX 163). Alerts aren't affected by Focus, so **Style = Alert** works around it.
 - **Not sandboxed**: the sandbox would complicate launching `afplay` and `system_profiler`, an acceptable trade-off for a tool you build from source.
