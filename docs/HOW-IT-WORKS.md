@@ -8,6 +8,7 @@ The technical side of the app: how it reads the battery, how it decides when to 
 battery-notifier-macos/
 ├── Sources/
 │   ├── BatteryNotifierApp.swift   App entry, menu bar icon, launch at login, notification setup
+│   ├── DockIcon.swift             The optional Dock icon and opening the panel from it
 │   ├── BatteryMonitor.swift       Reads the battery and decides when to warn
 │   ├── Notifier.swift             Shows notifications and alerts, plays sounds
 │   ├── PanelView.swift            The menu bar panel: status, health and a settings summary
