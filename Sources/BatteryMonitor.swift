@@ -91,9 +91,10 @@ final class BatteryMonitor: ObservableObject {
         }
     }
 
-    func sendTest() {
+    func sendTest(critical: Bool = false) {
         readBattery()
-        Notifier.warn(percent: percent ?? 0, threshold: Settings.threshold, minutesRemaining: minutesRemaining)
+        Notifier.warn(percent: percent ?? 0, threshold: Settings.threshold,
+                      critical: critical ? Settings.critical : nil, minutesRemaining: minutesRemaining)
     }
 
     private func readBattery() {
@@ -144,6 +145,7 @@ final class BatteryMonitor: ObservableObject {
     private func evaluate() {
         guard let percent else { return }
         let threshold = Settings.threshold
+        let critical = Settings.critical
 
         // Reset when charging or back above threshold, so the next drop warns again
         if !onBattery || percent >= threshold {
@@ -151,13 +153,17 @@ final class BatteryMonitor: ObservableObject {
             return
         }
 
+        let isCritical = critical > 0 && percent < critical
         if let lastWarned {
+            // Dropping into the critical level always warns, even with reminders off
+            let enteredCritical = isCritical && lastWarned >= critical
             let remindEvery = Settings.remindEvery
-            if remindEvery <= 0 || percent > lastWarned - remindEvery { return }
+            if !enteredCritical && (remindEvery <= 0 || percent > lastWarned - remindEvery) { return }
         }
 
         lastWarned = percent
-        Notifier.warn(percent: percent, threshold: threshold, minutesRemaining: minutesRemaining)
+        Notifier.warn(percent: percent, threshold: threshold, critical: isCritical ? critical : nil,
+                      minutesRemaining: minutesRemaining)
     }
 }
 

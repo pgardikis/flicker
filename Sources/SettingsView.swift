@@ -5,6 +5,7 @@ struct SettingsView: View {
     @EnvironmentObject var monitor: BatteryMonitor
 
     @AppStorage(Settings.thresholdKey) private var threshold = Settings.defaultThreshold
+    @AppStorage(Settings.criticalKey) private var critical = Settings.defaultCritical
     @AppStorage(Settings.remindEveryKey) private var remindEvery = Settings.defaultRemindEvery
     @AppStorage(Settings.styleKey) private var style = Settings.defaultStyle
     @AppStorage(Settings.soundKey) private var sound = Settings.defaultSound
@@ -38,6 +39,22 @@ struct SettingsView: View {
                     Text("\(threshold)%").monospacedDigit().bold()
                 }
                 Slider(value: Binding(get: { Double(threshold) }, set: { threshold = Int($0) }), in: 5...95, step: 1)
+            }
+
+            VStack(alignment: .leading, spacing: 2) {
+                Picker("Critical level", selection: $critical) {
+                    Text("Off").tag(0)
+                    ForEach(Settings.criticalOptions.filter { $0 < threshold }, id: \.self) { Text("\($0)%").tag($0) }
+                }
+                if critical > 0 {
+                    Text("Always shows an alert, even in Focus").font(.caption).foregroundStyle(.secondary)
+                }
+            }
+            // Keep the critical level below the threshold, so the picker always has a matching option
+            .onChange(of: threshold) { _, threshold in
+                if critical >= threshold {
+                    critical = Settings.criticalOptions.last { $0 < threshold } ?? 0
+                }
             }
 
             Picker("Remind again every", selection: $remindEvery) {
@@ -86,7 +103,14 @@ struct SettingsView: View {
             Divider()
 
             HStack {
-                Button("Send Test Warning") { monitor.sendTest() }
+                Menu("Send Test Warning") {
+                    Button("Low Battery") { monitor.sendTest() }
+                    Button("Critical") { monitor.sendTest(critical: true) }
+                        .disabled(critical == 0)
+                } primaryAction: {
+                    monitor.sendTest()
+                }
+                .fixedSize()
                 Spacer()
                 Button("Quit") { NSApp.terminate(nil) }
             }

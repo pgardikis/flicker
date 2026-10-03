@@ -22,17 +22,26 @@ enum Notifier {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
     }
 
-    static func warn(percent: Int, threshold: Int, minutesRemaining: Int?) {
-        let title = "Low Battery: \(percent)%"
-        var message = "Battery is below \(threshold)%. Plug in your charger."
+    /// `critical` is the critical level when the battery is below it, nil otherwise.
+    static func warn(percent: Int, threshold: Int, critical: Int? = nil, minutesRemaining: Int?) {
+        let title: String
+        var message: String
+        if let critical {
+            title = "Critical Battery: \(percent)%"
+            message = "Battery is below \(critical)%. Plug in now."
+        } else {
+            title = "Low Battery: \(percent)%"
+            message = "Battery is below \(threshold)%. Plug in your charger."
+        }
         if let minutes = minutesRemaining, minutes > 0 {
             message += " (\(minutes / 60):\(String(format: "%02d", minutes % 60)) remaining)"
         }
 
         playSound()
 
-        if Settings.style == "alert" {
-            showAlert(title: title, message: message)
+        // Focus can hide a notification but not an alert, so a critical warning is always an alert
+        if critical != nil || Settings.style == "alert" {
+            showAlert(title: title, message: message, critical: critical != nil)
         } else {
             postNotification(title: title, message: message)
         }
@@ -48,7 +57,7 @@ enum Notifier {
         try? process.run()
     }
 
-    private static func showAlert(title: String, message: String) {
+    private static func showAlert(title: String, message: String, critical: Bool) {
         // runModal blocks here, so a warning arriving meanwhile must not open a second dialog
         guard !alertShowing else { return }
         alertShowing = true
@@ -56,7 +65,7 @@ enum Notifier {
 
         NSApp.activate(ignoringOtherApps: true)
         let alert = NSAlert()
-        alert.alertStyle = .warning
+        alert.alertStyle = critical ? .critical : .warning
         alert.messageText = title
         alert.informativeText = message
         alert.runModal()

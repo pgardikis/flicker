@@ -8,13 +8,14 @@ It lives in the menu bar as a ⛽ fuel pump icon, checks the battery level in th
 
 - **Custom threshold**: warn below any level from 5% to 95% (default 40%)
 - **Reminders**: warn again after every further 1 / 2 / 5 / 10% drop, or only once
+- **Critical level**: below a second, lower level (default 10%), the warning is always an alert that Focus can't hide
 - **Two styles**: a notification banner, or an alert that stays until you click OK
 - **Sound**: any macOS system sound, with a preview button and a volume boost up to 4×
 - **Launch at login**
 - **Live battery status**: percentage, charging state and time remaining in the panel
 - **Battery health**: shows the health rating, maximum capacity and cycle count as System Settings reports them. The rating is green when Normal and red otherwise. Maximum capacity is green from 80%, orange from 60% and red below that, since Apple designs batteries to keep about 80% at their rated cycle count
 - **Percentage in the menu bar**: optional, next to the fuel pump icon
-- **Send Test Warning** button to check your settings
+- **Send Test Warning** button to check your settings. Its menu can also send a test critical warning
 
 The fuel pump becomes filled with a "!" while the battery is below your threshold.
 
@@ -48,6 +49,7 @@ Click the fuel pump icon in the menu bar to open the panel. Changes save instant
 | Setting | Default | Description |
 |---|---|---|
 | Warn below | 40% | Warns when on battery and below this level |
+| Critical level | 10% | Below this, always warns with an alert, even when Style is Notification. `Off`, 5, 10, 15 or 20%, and always below *Warn below* |
 | Remind again every | 5% drop | Warns again after each further drop. `Never` warns once |
 | Style | Notification | `Notification` shows a banner. `Alert` shows a dialog until dismissed |
 | Sound | Sosumi | Any sound from `/System/Library/Sounds`, or None |
@@ -59,6 +61,7 @@ Click the fuel pump icon in the menu bar to open the panel. Changes save instant
 
 - A warning fires only when the Mac is **on battery** and **below the threshold**.
 - After the first warning, it reminds you again once the level drops another *Remind again every* amount (e.g. 39% → 34% → 29%).
+- Dropping below the *Critical level* always warns, even if the next reminder isn't due or reminders are off, and that warning is an alert.
 - Plugging in, or charging back above the threshold, resets it, so the next drop warns again.
 - The level is read immediately when macOS reports a power change, with a check every 60 seconds as a backup.
 
@@ -85,7 +88,7 @@ battery-notify/
 - **Battery reading**: `BatteryMonitor` uses macOS's IOKit power source API (`IOPSCopyPowerSourcesInfo`) to get the charge level, whether it's on battery, and time remaining. `IOPSNotificationCreateRunLoopSource` delivers instant updates, and a 60-second timer backs it up.
 - **Battery health**: the health rating, maximum capacity and cycle count come from `/usr/sbin/system_profiler SPPowerDataType -json`, read at launch and whenever the panel opens, so they match System Settings. IOKit only exposes raw mAh figures, and its own health rating can disagree (it may say Poor where System Settings says Normal).
 - **Notifications**: sent with Apple's `UserNotifications` framework. Each warning reuses one identifier, so a reminder replaces the previous banner instead of stacking. If notification permission isn't granted, the app falls back to AppleScript's `display notification`. The code asks for a *time sensitive* interruption level, but macOS ignores that without a Developer ID (see Known limits), so notifications are suppressed by Focus.
-- **Alerts**: a standard `NSAlert` warning dialog.
+- **Alerts**: a standard `NSAlert` warning dialog. A critical warning uses the critical alert style.
 - **Sound**: played with `/usr/bin/afplay` instead of the notification sound. Notification sounds are capped by the system *alert volume*. `afplay` follows your *output volume* and supports a boost multiplier.
 - **Settings**: stored in `UserDefaults` (`~/Library/Preferences/local.batterynotify.plist`).
 - **Launch at login**: registered with `SMAppService.mainApp`.
