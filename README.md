@@ -4,7 +4,7 @@ A lightweight macOS menu bar app that warns you when your MacBook's battery runs
 
 macOS only warns when the battery is nearly empty, at a level you can't change. Flicker warns at the level you choose, reminds you as the battery keeps dropping, plays a sound loud enough to notice, and can show alerts that get through Focus.
 
-![Flicker in light and dark mode. Top row: the menu bar panel, showing 45% on battery with 1:30 remaining, battery health Normal, maximum capacity 80% and 1,054 cycles, a summary of the warning settings, and Settings, Test and Quit buttons. Bottom row: the Settings window, with Warnings (warn below 40%, critical level 10%, remind every 5% drop), Alert (notification style, Sosumi sound, 300% volume) and General (show in Dock, percentage in menu bar, launch at login) sections.](docs/images/screenshots.png)
+![Flicker in light and dark mode. Top row: the menu bar panel, showing 74% and charging with 1:19 until full, battery health Normal, maximum capacity 80% and 1,054 cycles, a summary of the warning settings, and Settings, Test and Quit buttons. Bottom row: the Settings window, with Warnings (warn below 40%, critical level 10%, remind every 5% drop), Alert (notification style, Sosumi sound, 300% volume) and General (show in Dock, percentage in menu bar, launch at login) sections.](docs/images/screenshots.png)
 
 ## Features
 
