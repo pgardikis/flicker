@@ -9,6 +9,9 @@ final class BatteryMonitor: ObservableObject {
     @Published private(set) var percent: Int?
     @Published private(set) var onBattery = false
     @Published private(set) var minutesRemaining: Int?
+    @Published private(set) var isCharging = false
+    @Published private(set) var isCharged = false
+    @Published private(set) var minutesToFull: Int?
     @Published private(set) var details: BatteryDetails?
     /// When muted warnings resume; `.distantFuture` means when the charger is connected.
     @Published private(set) var mutedUntil: Date?
@@ -17,6 +20,12 @@ final class BatteryMonitor: ObservableObject {
     private var lastWarned: Int?
     private var timer: Timer?
     private var muteTimer: Timer?
+
+    /// When the adapter was first seen connected without charging. macOS reports that for a
+    /// moment on every plug and unplug, so "Not charging" waits until it has lasted a while.
+    private var notChargingSince: Date?
+    private var settleTimer: Timer?
+    private static let notChargingDelay: TimeInterval = 3
 
     var isMuted: Bool { mutedUntil != nil }
 
@@ -44,10 +53,29 @@ final class BatteryMonitor: ObservableObject {
     }
 
     var statusText: String {
-        guard percent != nil else { return "No battery found" }
-        guard onBattery else { return "Power adapter connected" }
-        guard let minutes = minutesRemaining, minutes > 0 else { return "On battery" }
-        return "On battery · \(minutes / 60):\(String(format: "%02d", minutes % 60)) remaining"
+        guard let percent else { return "No battery found" }
+        if onBattery {
+            // macOS has no estimate (-1) for a minute or two after unplugging
+            guard let minutes = minutesRemaining, minutes > 0 else { return "On battery · Calculating…" }
+            return "On battery · \(Self.duration(minutes)) remaining"
+        }
+        if isCharging {
+            guard let minutes = minutesToFull, minutes > 0 else { return "Charging" }
+            return "Charging · \(Self.duration(minutes)) until full"
+        }
+        if isCharged || percent >= 100 { return "Fully charged" }
+        // On the adapter but not charging below 100% means macOS is holding the charge, for
+        // example Optimized Battery Charging pausing at 80%. Until that has lasted a few
+        // seconds it's more likely the brief gap while plugging in or unplugging.
+        if let notChargingSince, Date().timeIntervalSince(notChargingSince) >= Self.notChargingDelay {
+            return "Not charging"
+        }
+        return "Power adapter connected"
+    }
+
+    /// Minutes as h:mm, the way macOS shows battery time.
+    static func duration(_ minutes: Int) -> String {
+        "\(minutes / 60):\(String(format: "%02d", minutes % 60))"
     }
 
     /// nil until system_profiler has answered, or when it reports no health for this battery.
@@ -158,6 +186,10 @@ final class BatteryMonitor: ObservableObject {
             percent = current * 100 / max
             onBattery = desc[kIOPSPowerSourceStateKey] as? String == kIOPSBatteryPowerValue
             minutesRemaining = desc[kIOPSTimeToEmptyKey] as? Int
+            isCharging = desc[kIOPSIsChargingKey] as? Bool ?? false
+            isCharged = desc[kIOPSIsChargedKey] as? Bool ?? false
+            minutesToFull = desc[kIOPSTimeToFullChargeKey] as? Int
+            trackNotCharging(!onBattery && !isCharging && !isCharged)
             return
         }
 
@@ -165,6 +197,28 @@ final class BatteryMonitor: ObservableObject {
         percent = nil
         onBattery = false
         minutesRemaining = nil
+        isCharging = false
+        isCharged = false
+        minutesToFull = nil
+        trackNotCharging(false)
+    }
+
+    private func trackNotCharging(_ notCharging: Bool) {
+        guard notCharging else {
+            notChargingSince = nil
+            settleTimer?.invalidate()
+            settleTimer = nil
+            return
+        }
+        guard notChargingSince == nil else { return }
+        notChargingSince = Date()
+        // Re-read once the delay has passed, so the status switches to "Not charging" on time
+        // instead of at the next poll
+        let timer = Timer(timeInterval: Self.notChargingDelay, repeats: false) { _ in
+            MainActor.assumeIsolated { BatteryMonitor.shared.refresh() }
+        }
+        RunLoop.main.add(timer, forMode: .common)
+        settleTimer = timer
     }
 
     private nonisolated static func readDetails() -> BatteryDetails? {

@@ -34,7 +34,7 @@ enum Notifier {
             message = "Battery is below \(threshold)%. Plug in your charger."
         }
         if let minutes = minutesRemaining, minutes > 0 {
-            message += " (\(minutes / 60):\(String(format: "%02d", minutes % 60)) remaining)"
+            message += " (\(BatteryMonitor.duration(minutes)) remaining)"
         }
 
         playSound()

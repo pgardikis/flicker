@@ -13,7 +13,7 @@ It lives in the menu bar as a ⛽ fuel pump icon, checks the battery level in th
 - **Two styles**: a notification banner, or an alert that stays until you click OK
 - **Sound**: any macOS system sound, with a preview button and a volume boost up to 400%
 - **Launch at login**
-- **Live battery status**: percentage, charging state and time remaining in the panel
+- **Live battery status**: percentage, and whether the Mac is on battery (with time remaining), charging (with time until full), fully charged or not charging
 - **Battery health**: shows the health rating, maximum capacity and cycle count as System Settings reports them, with the rating in green when Normal and red otherwise
 - **Percentage in the menu bar**: optional, next to the fuel pump icon
 - **Compact panel**: the menu bar panel shows the battery, its health and a summary of your warning settings. Everything else is in a Settings window
@@ -90,6 +90,7 @@ battery-notify/
 ### Components
 
 - **Battery reading**: `BatteryMonitor` uses macOS's IOKit power source API (`IOPSCopyPowerSourcesInfo`) to get the charge level, whether it's on battery, and time remaining. `IOPSNotificationCreateRunLoopSource` delivers instant updates, and a 60-second timer backs it up.
+- **Status line**: "Not charging" (macOS holding the charge, for example at 80%) only shows once it has lasted 3 seconds, since macOS reports that state for a moment on every plug and unplug. Until a time estimate exists, the panel says Calculating….
 - **Battery health**: the health rating, maximum capacity and cycle count come from `/usr/sbin/system_profiler SPPowerDataType -json`, read at launch and whenever the panel opens, so they match System Settings. IOKit only exposes raw mAh figures, and its own health rating can disagree (it may say Poor where System Settings says Normal).
 - **Notifications**: sent with Apple's `UserNotifications` framework. Each warning reuses one identifier, so a reminder replaces the previous banner instead of stacking. If notification permission isn't granted, the app falls back to AppleScript's `display notification`. The code asks for a *time sensitive* interruption level, but macOS ignores that without a Developer ID (see Known limits), so notifications are suppressed by Focus.
 - **Alerts**: a standard `NSAlert` warning dialog. A critical warning uses the critical alert style.
