@@ -78,21 +78,37 @@ struct PanelView: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
             Spacer(minLength: 0)
-            // Icon only, so the status text beside it isn't truncated
+            // Icon only, so the status text beside it isn't truncated. A plain bell while warnings
+            // are on, so it never looks muted when it isn't; a filled, tinted slashed bell while muted
             Menu {
+                if monitor.isMuted {
+                    Button("Unmute") { monitor.unmute() }
+                    Divider()
+                }
                 Button("For 30 Minutes") { monitor.mute(for: 30 * 60) }
                 Button("For 1 Hour") { monitor.mute(for: 60 * 60) }
                 Button("Until Plugged In") { monitor.mute(for: nil) }
                     .disabled(!monitor.onBattery)
             } label: {
-                Label("Mute", systemImage: monitor.isMuted ? "bell.slash.fill" : "bell.slash")
+                Label { Text(monitor.isMuted ? "Muted" : "Mute") } icon: { muteIcon }
                     .labelStyle(.iconOnly)
             }
             .menuStyle(.borderlessButton)
             .menuIndicator(.hidden)
             .fixedSize()
-            .help("Mute warnings")
+            .help(monitor.isMuted ? "Warnings are muted" : "Mute warnings")
         }
+    }
+
+    /// A menu's label is drawn as a template image, which drops SwiftUI colors, so the muted bell
+    /// is an NSImage that carries its own orange.
+    private var muteIcon: Image {
+        guard monitor.isMuted,
+              let image = NSImage(systemSymbolName: "bell.slash.fill", accessibilityDescription: "Muted")?
+                .withSymbolConfiguration(.init(paletteColors: [.systemOrange]))
+        else { return Image(systemName: "bell") }
+        image.isTemplate = false
+        return Image(nsImage: image)
     }
 
     /// Health rating, maximum capacity and cycle count on one line. Only the rating is colored,

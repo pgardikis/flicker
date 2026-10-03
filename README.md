@@ -9,7 +9,7 @@ It lives in the menu bar as a ⛽ fuel pump icon, checks the battery level in th
 - **Custom threshold**: warn below any level from 5% to 95% (default 40%)
 - **Reminders**: warn again after every further 1 / 2 / 5 / 10% drop, or only once
 - **Critical level**: below a second, lower level (default 10%), the warning is always an alert that Focus can't hide
-- **Mute**: silence warnings for 30 minutes, 1 hour or until you plug in, from the bell in the panel. The critical level still gets through
+- **Mute**: silence warnings for 30 minutes, 1 hour or until you plug in, from the bell in the panel. The critical level still gets through, and the bell turns orange and crossed out while muted
 - **Two styles**: a notification banner, or an alert that stays until you click OK
 - **Sound**: any macOS system sound, with a preview button and a volume boost up to 400%
 - **Launch at login**
