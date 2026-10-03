@@ -9,14 +9,15 @@ It lives in the menu bar as a ⛽ fuel pump icon, checks the battery level in th
 - **Custom threshold**: warn below any level from 5% to 95% (default 40%)
 - **Reminders**: warn again after every further 1 / 2 / 5 / 10% drop, or only once
 - **Critical level**: below a second, lower level (default 10%), the warning is always an alert that Focus can't hide
-- **Mute**: silence warnings for 30 minutes, 1 hour or until you plug in. The critical level still gets through
+- **Mute**: silence warnings for 30 minutes, 1 hour or until you plug in, from the bell in the panel. The critical level still gets through
 - **Two styles**: a notification banner, or an alert that stays until you click OK
-- **Sound**: any macOS system sound, with a preview button and a volume boost up to 4×
+- **Sound**: any macOS system sound, with a preview button and a volume boost up to 400%
 - **Launch at login**
 - **Live battery status**: percentage, charging state and time remaining in the panel
-- **Battery health**: shows the health rating, maximum capacity and cycle count as System Settings reports them. The rating is green when Normal and red otherwise. Maximum capacity is green from 80%, orange from 60% and red below that, since Apple designs batteries to keep about 80% at their rated cycle count
+- **Battery health**: shows the health rating, maximum capacity and cycle count as System Settings reports them, with the rating in green when Normal and red otherwise
 - **Percentage in the menu bar**: optional, next to the fuel pump icon
-- **Send Test Warning** button to check your settings. Its menu can also send a test critical warning
+- **Compact panel**: the menu bar panel shows the battery, its health and a summary of your warning settings. Everything else is in a Settings window
+- **Test** button in the panel to check your settings. Its menu can also send a test critical warning
 
 The fuel pump becomes filled with a "!" while the battery is below your threshold, and crossed out while warnings are muted.
 
@@ -45,7 +46,7 @@ Always run the app from `/Applications`. If a second copy is opened (say the one
 
 ## Settings
 
-Click the fuel pump icon in the menu bar to open the panel. Changes save instantly.
+Click the fuel pump icon in the menu bar to open the panel, then **Settings…** to open the Settings window. Changes apply as soon as you make them, so just close the window when you're done.
 
 | Setting | Default | Description |
 |---|---|---|
@@ -54,7 +55,7 @@ Click the fuel pump icon in the menu bar to open the panel. Changes save instant
 | Remind again every | 5% drop | Warns again after each further drop. `Never` warns once |
 | Style | Notification | `Notification` shows a banner. `Alert` shows a dialog until dismissed |
 | Sound | Sosumi | Any sound from `/System/Library/Sounds`, or None |
-| Volume | 3.0× | 0.5–4×. Relative to your speaker volume |
+| Volume | 300% | 50–400% of your speaker volume |
 | Show percentage in menu bar | On | Shows the battery level next to the fuel pump |
 | Launch at login | On | Starts the app when you log in |
 
@@ -77,7 +78,8 @@ battery-notify/
 │   ├── BatteryNotifyApp.swift   App entry, menu bar icon, launch at login, notification setup
 │   ├── BatteryMonitor.swift     Reads the battery and decides when to warn
 │   ├── Notifier.swift           Shows notifications/alerts and plays sounds
-│   ├── SettingsView.swift       The settings panel (SwiftUI)
+│   ├── PanelView.swift          The menu bar panel: status, health and a settings summary
+│   ├── SettingsView.swift       The Settings window
 │   └── Settings.swift           Setting keys and defaults
 ├── Info.plist                   App metadata (menu bar only, no Dock icon)
 ├── make-icon.swift              Draws the app icon
@@ -148,22 +150,22 @@ Known limits:
 ## Troubleshooting
 
 **No notification appears**
-Allow notifications for Battery Notify in System Settings → Notifications. Use **Send Test Warning** to check.
+Allow notifications for Battery Notify in System Settings → Notifications. Use the panel's **Test** button to check.
 
 **Nothing appears while Focus / Do Not Disturb is on**
 Expected, and not fixable on an ad-hoc build. Breaking through Focus needs the time-sensitive entitlement, which requires a paid Developer ID (see Known limits). Switch **Style** to **Alert**: an `NSAlert` doesn't go through the notification system, so Focus can't suppress it. The warning sound still plays either way, since it's played directly with `afplay`.
 
 **Sound too quiet**
-Increase Volume in the panel. It's relative to your speaker volume, so turn that up too. Values above about 4× tend to distort.
+Increase Volume in Settings. It's relative to your speaker volume, so turn that up too. Values above about 400% tend to distort.
 
 **Two fuel pump icons in the menu bar**
 Shouldn't happen any more: a second copy quits itself at launch. If you ever do see two, check which copies are running with:
 ```bash
-ps -axo pid,command | grep "[B]atteryNotify"
+ps -axo pid,command | grep "[B]atteryNotifier"
 ```
 
 **Doesn't start at login**
-Check System Settings → General → Login Items, or toggle **Launch at login** off and on in the panel.
+Check System Settings → General → Login Items, or toggle **Launch at login** off and on in Settings.
 
 **`open` fails with error -600 after installing**
 `build.sh --install` retries automatically. If it still fails, open the app from Applications manually.

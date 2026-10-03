@@ -1,6 +1,7 @@
 import ServiceManagement
 import SwiftUI
 
+/// The Settings window, opened from the panel's Settings… button.
 struct SettingsView: View {
     @EnvironmentObject var monitor: BatteryMonitor
 
@@ -16,179 +17,100 @@ struct SettingsView: View {
     @State private var loginError: String?
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            header
-            if let mutedText = monitor.mutedText {
-                HStack {
-                    Label(mutedText, systemImage: "bell.slash.fill")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    Spacer()
-                    Button("Unmute") { monitor.unmute() }
-                        .controlSize(.small)
-                }
-            }
-            if monitor.percent != nil, let healthText = monitor.healthText {
-                Label {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(healthText).foregroundStyle(monitor.healthIsNormal ? .green : .red)
-                        if let capacityLine { capacityLine }
+        Form {
+            Section {
+                LabeledContent("Warn below") {
+                    HStack {
+                        // Re-check on release rather than on every step, so dragging past the current
+                        // level doesn't fire a warning mid-drag
+                        // No step: 91 one-percent steps draw as a smudge of tick marks, so round instead
+                        Slider(value: Binding(get: { Double(threshold) }, set: { threshold = Int($0.rounded()) }),
+                               in: 5...95) {
+                            if !$0 { monitor.refresh() }
+                        }
+                        Text("\(threshold)%").monospacedDigit().bold().foregroundStyle(.primary)
+                            .frame(width: 44, alignment: .trailing)
                     }
-                } icon: {
-                    Image(systemName: monitor.healthIsNormal ? "checkmark.seal.fill" : "exclamationmark.triangle.fill")
-                        .foregroundStyle(monitor.healthIsNormal ? .green : .red)
                 }
-                .font(.caption)
-            }
-            Divider()
 
-            VStack(alignment: .leading, spacing: 4) {
-                HStack {
-                    Text("Warn below")
-                    Spacer()
-                    Text("\(threshold)%").monospacedDigit().bold()
-                }
-                // Re-check on release rather than on every step, so dragging past the current
-                // level doesn't fire a warning mid-drag
-                Slider(value: Binding(get: { Double(threshold) }, set: { threshold = Int($0) }), in: 5...95, step: 1) {
-                    if !$0 { monitor.refresh() }
-                }
-            }
-
-            VStack(alignment: .leading, spacing: 2) {
                 Picker("Critical level", selection: Binding(get: { critical }, set: { critical = $0; monitor.refresh() })) {
                     Text("Off").tag(0)
                     ForEach(Settings.criticalOptions.filter { $0 < threshold }, id: \.self) { Text("\($0)%").tag($0) }
                 }
-                if critical > 0 {
-                    Text("Always shows an alert, even in Focus").font(.caption).foregroundStyle(.secondary)
+                // Keep the critical level below the threshold, so the picker always has a matching option
+                .onChange(of: threshold) { _, threshold in
+                    if critical >= threshold {
+                        critical = Settings.criticalOptions.last { $0 < threshold } ?? 0
+                    }
                 }
-            }
-            // Keep the critical level below the threshold, so the picker always has a matching option
-            .onChange(of: threshold) { _, threshold in
-                if critical >= threshold {
-                    critical = Settings.criticalOptions.last { $0 < threshold } ?? 0
+
+                Picker("Remind again every", selection: $remindEvery) {
+                    Text("Never").tag(0)
+                    ForEach([1, 2, 5, 10], id: \.self) { Text("\($0)% drop").tag($0) }
                 }
+                .onChange(of: remindEvery) { monitor.refresh() }
+            } header: {
+                Text("Warnings")
+            } footer: {
+                Text("Critical alerts always show, even in Focus.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
 
-            Picker("Remind again every", selection: $remindEvery) {
-                Text("Never").tag(0)
-                ForEach([1, 2, 5, 10], id: \.self) { Text("\($0)% drop").tag($0) }
-            }
-            .onChange(of: remindEvery) { monitor.refresh() }
-
-            Picker("Style", selection: $style) {
-                Text("Notification").tag("notification")
-                Text("Alert").tag("alert")
-            }
-            .pickerStyle(.segmented)
-
-            HStack {
-                Picker("Sound", selection: $sound) {
-                    Text("None").tag("")
-                    ForEach(Notifier.availableSounds, id: \.self) { Text($0).tag($0) }
+            Section("Alert") {
+                Picker("Style", selection: $style) {
+                    Text("Notification").tag("notification")
+                    Text("Alert").tag("alert")
                 }
-                Button {
-                    Notifier.playSound(name: sound, volume: volume)
-                } label: {
-                    Image(systemName: "play.fill")
+                .pickerStyle(.segmented)
+
+                LabeledContent("Sound") {
+                    HStack {
+                        Picker("Sound", selection: $sound) {
+                            Text("None").tag("")
+                            ForEach(Notifier.availableSounds, id: \.self) { Text($0).tag($0) }
+                        }
+                        .labelsHidden()
+                        .fixedSize()
+                        Button {
+                            Notifier.playSound(name: sound, volume: volume)
+                        } label: {
+                            Image(systemName: "play.fill")
+                        }
+                        .help("Preview sound")
+                        .disabled(sound.isEmpty)
+                    }
                 }
-                .help("Preview sound")
+
+                // Stored as an afplay multiplier of the speaker volume; shown as a percentage of it
+                LabeledContent("Volume") {
+                    HStack {
+                        Image(systemName: "speaker.fill").foregroundStyle(.secondary)
+                        Slider(value: $volume, in: 0.5...4, step: 0.5)
+                        Image(systemName: "speaker.wave.3.fill").foregroundStyle(.secondary)
+                        Text("\(Int(volume * 100))%").monospacedDigit().bold().foregroundStyle(.primary)
+                            .frame(width: 44, alignment: .trailing)
+                    }
+                }
+                .help("Relative to your speaker volume: 100% plays at the speaker volume")
                 .disabled(sound.isEmpty)
             }
 
-            VStack(alignment: .leading, spacing: 4) {
-                HStack {
-                    Text("Volume")
-                    Spacer()
-                    Text(String(format: "%.1f×", volume)).monospacedDigit().bold()
+            Section("General") {
+                Toggle("Show percentage in menu bar", isOn: $showPercent)
+                // An explicit binding, so re-reading the status in onAppear can't re-trigger a write
+                Toggle("Launch at login", isOn: Binding(get: { launchAtLogin }, set: { setLaunchAtLogin($0) }))
+                if let loginError {
+                    Text(loginError).font(.caption).foregroundStyle(.red)
                 }
-                Slider(value: $volume, in: 0.5...4, step: 0.5)
-            }
-            .disabled(sound.isEmpty)
-
-            Toggle("Show percentage in menu bar", isOn: $showPercent)
-
-            // An explicit binding, so re-reading the status in onAppear can't re-trigger a write
-            Toggle("Launch at login", isOn: Binding(get: { launchAtLogin }, set: { setLaunchAtLogin($0) }))
-            if let loginError {
-                Text(loginError).font(.caption).foregroundStyle(.red)
-            }
-
-            Divider()
-
-            HStack {
-                Menu("Send Test Warning") {
-                    Button("Low Battery") { monitor.sendTest() }
-                    Button("Critical") { monitor.sendTest(critical: true) }
-                        .disabled(critical == 0)
-                } primaryAction: {
-                    monitor.sendTest()
-                }
-                .fixedSize()
-                Spacer()
-                Button("Quit") { NSApp.terminate(nil) }
             }
         }
-        .padding()
-        .frame(width: 300)
+        .formStyle(.grouped)
+        .frame(width: 440)
+        .fixedSize(horizontal: false, vertical: true)
         .onAppear {
-            monitor.refresh()
-            monitor.refreshDetails()
-            // System Settings can change this behind our back, so re-read on every open
+            // System Settings can change this behind our back, so re-read every time the window opens
             launchAtLogin = SMAppService.mainApp.status == .enabled
-        }
-    }
-
-    private var header: some View {
-        HStack(spacing: 12) {
-            Image(systemName: monitor.symbolName)
-                .font(.system(size: 28))
-                .foregroundStyle(monitor.isLow ? .red : .primary)
-            VStack(alignment: .leading) {
-                Text(monitor.percent.map { "\($0)%" } ?? "—").font(.title2.bold())
-                Text(monitor.statusText).font(.caption).foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            Spacer(minLength: 0)
-            // Up here rather than in the bottom row, which has no room left beside Quit. Icon only,
-            // so the status text beside it isn't truncated
-            Menu {
-                Button("For 30 Minutes") { monitor.mute(for: 30 * 60) }
-                Button("For 1 Hour") { monitor.mute(for: 60 * 60) }
-                Button("Until Plugged In") { monitor.mute(for: nil) }
-                    .disabled(!monitor.onBattery)
-            } label: {
-                Label("Mute", systemImage: monitor.isMuted ? "bell.slash.fill" : "bell.slash")
-                    .labelStyle(.iconOnly)
-            }
-            .menuStyle(.borderlessButton)
-            .menuIndicator(.hidden)
-            .fixedSize()
-            .help("Mute warnings")
-        }
-    }
-
-    /// Maximum capacity colored by wear, followed by the cycle count. nil when neither is known.
-    private var capacityLine: Text? {
-        var parts: [Text] = []
-        if let capacity = monitor.maximumCapacityPercent {
-            parts.append(Text("Maximum capacity \(capacity)%").foregroundStyle(capacityColor(capacity)))
-        }
-        if let cycles = monitor.details?.cycleCount {
-            parts.append(Text("\(cycles.formatted()) cycles").foregroundStyle(.secondary))
-        }
-        guard let first = parts.first else { return nil }
-        return parts.dropFirst().reduce(first) { $0 + Text(" · ").foregroundStyle(.secondary) + $1 }
-    }
-
-    /// Apple designs batteries to keep about 80% capacity at their rated cycle count.
-    /// Orange rather than yellow, which is hard to read on the light-mode panel.
-    private func capacityColor(_ capacity: Int) -> Color {
-        switch capacity {
-        case 80...: return .green
-        case 60..<80: return .orange
-        default: return .red
         }
     }
 

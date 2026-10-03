@@ -10,7 +10,7 @@ struct BatteryNotifyApp: App {
 
     var body: some Scene {
         MenuBarExtra {
-            SettingsView().environmentObject(monitor)
+            PanelView().environmentObject(monitor)
         } label: {
             HStack {
                 Image(systemName: monitor.isMuted ? "fuelpump.slash"
@@ -21,6 +21,10 @@ struct BatteryNotifyApp: App {
             }
         }
         .menuBarExtraStyle(.window)
+
+        SwiftUI.Settings {
+            SettingsView().environmentObject(monitor)
+        }
     }
 }
 

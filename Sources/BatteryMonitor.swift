@@ -51,10 +51,10 @@ final class BatteryMonitor: ObservableObject {
     }
 
     /// nil until system_profiler has answered, or when it reports no health for this battery.
-    var healthText: String? {
+    var healthRating: String? {
         guard let health = details?.health else { return nil }
         // system_profiler's JSON says "Good" where System Settings shows "Normal"
-        return "Battery health: \(health == "Good" ? "Normal" : health)"
+        return health == "Good" ? "Normal" : health
     }
 
     var healthIsNormal: Bool { details?.health == "Good" }
