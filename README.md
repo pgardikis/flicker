@@ -34,7 +34,7 @@ The app isn't notarized, so build it on each Mac you want to use it on. Run `./b
 
 ## Usage
 
-Click the ⛽ fuel pump icon in the menu bar to open the panel. It shows the battery, its health and a summary of your warnings. **Test** sends a test warning, and the bell mutes warnings. **Settings…** opens the Settings window, where changes apply straight away.
+Click the charging station icon in the menu bar to open the panel. It shows the battery, its health and a summary of your warnings. **Test** sends a test warning, and the bell mutes warnings. **Settings…** opens the Settings window, where changes apply straight away.
 
 | Setting | Default | Options | What it does |
 |---|---|---|---|
@@ -45,7 +45,7 @@ Click the ⛽ fuel pump icon in the menu bar to open the panel. It shows the bat
 | Sound | Sosumi | Any system sound, None | Played with every warning |
 | Volume | 300% | 50–400% | How loud the sound plays (see below) |
 | Show in Dock | Off | On, Off | Also shows the app in the Dock and the ⌘Tab app switcher. Clicking the Dock icon opens the panel |
-| Show percentage in menu bar | On | On, Off | Shows the level next to the fuel pump |
+| Show percentage in menu bar | On | On, Off | Shows the level next to the charging station |
 | Launch at login | On | On, Off | Starts the app when you log in |
 
 The critical level always stays below *Warn below*: Settings only offers lower values, and moves it down if you drag *Warn below* under it, or turns it off if nothing lower is left.
@@ -74,7 +74,7 @@ The menu bar icon fills with a "!" while the battery is low, and is crossed out 
 
 ## Uninstall
 
-1. Click the fuel pump and choose **Quit**
+1. Click the charging station and choose **Quit**
 2. Remove **Battery Notifier** in System Settings → General → Login Items
 3. Delete `/Applications/Battery Notifier.app`
 4. Delete its settings: `defaults delete local.batterynotify`
