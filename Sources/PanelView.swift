@@ -159,12 +159,24 @@ struct PanelView: View {
         // The panel is the key window while its button is being clicked. Closing it leaves the
         // Settings window on its own, rather than looking like a second pane of the panel
         let panel = NSApp.keyWindow
+        // The screen whose menu bar was clicked, read before the panel closes
+        let screen = panel?.screen ?? NSScreen.main
         // A menu bar app isn't frontmost, so without activating, the window opens behind others
         NSApp.activate(ignoringOtherApps: true)
         openSettings()
         panel?.close()
         DispatchQueue.main.async {
-            NSApp.windows.filter { $0.isVisible && $0.canBecomeMain }.forEach { $0.makeKeyAndOrderFront(nil) }
+            // The Settings window is the app's only window that can become main
+            for window in NSApp.windows where window.isVisible && window.canBecomeMain {
+                // Apple's convention is to reopen a window where it was left, so keep the saved
+                // spot when it's on this screen. Otherwise (first open, another display, or one
+                // that's gone) center it here rather than on a screen the user isn't looking at.
+                if let visible = screen?.visibleFrame, !visible.contains(window.frame) {
+                    window.setFrameOrigin(NSPoint(x: visible.midX - window.frame.width / 2,
+                                                  y: visible.midY - window.frame.height / 2))
+                }
+                window.makeKeyAndOrderFront(nil)
+            }
         }
     }
 }
