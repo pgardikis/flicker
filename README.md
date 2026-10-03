@@ -15,7 +15,7 @@ macOS only warns when the battery is nearly empty, at a level you can't change. 
 - **Mute** for 30 minutes, 1 hour or until you plug in
 - **Battery status**: time remaining, charging, fully charged or not charging
 - **Battery health**, maximum capacity and cycle count, as System Settings shows them
-- **Percentage in the menu bar** (optional) and **launch at login**
+- **Percentage in the menu bar**, an optional **Dock icon**, and **launch at login**
 - **Private**: no network access and no data collection
 
 ## Install
@@ -44,6 +44,7 @@ Click the ⛽ fuel pump icon in the menu bar to open the panel. It shows the bat
 | Style | Notification | Notification, Alert | A banner, or a dialog that stays until you click OK |
 | Sound | Sosumi | Any system sound, None | Played with every warning |
 | Volume | 300% | 50–400% | How loud the sound plays (see below) |
+| Show in Dock | Off | On, Off | Also shows the app in the Dock and the ⌘Tab app switcher. Clicking the Dock icon opens the panel |
 | Show percentage in menu bar | On | On, Off | Shows the level next to the fuel pump |
 | Launch at login | On | On, Off | Starts the app when you log in |
 

@@ -49,7 +49,8 @@ Test warnings from the panel ignore all of this and always fire.
 - **Settings window placement**: it reopens where you left it, as macOS windows do, but only if that spot is on the screen whose menu bar you clicked. Otherwise (the first time, another display, or one that's been disconnected) it opens centred on that screen.
 - **Launch at login**: registered with `SMAppService.mainApp`.
 - **Single instance**: a second copy (say the one in `build/`) sees the running one by bundle ID and quits at launch, so there are never two icons or duplicate warnings. Run the app from `/Applications`.
-- **Menu bar only**: `LSUIElement` in `Info.plist` hides the Dock icon and app menu.
+- **Menu bar only by default**: `LSUIElement` in `Info.plist` hides the Dock icon and app menu.
+- **Optional Dock icon**: *Show in Dock* switches the app's activation policy between regular and accessory, so the icon appears or disappears without a relaunch, along with the ⌘Tab entry and the app menu. SwiftUI's menu bar item has no API to open its panel, so a click on the Dock icon finds the app's own menu bar icon and clicks it. That relies on AppKit's private `NSStatusBarWindow` class name; if the icon can't be found, the click opens Settings instead, through the app menu's Settings… item.
 
 ## What `build.sh` does
 

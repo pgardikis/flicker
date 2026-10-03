@@ -12,6 +12,7 @@ struct SettingsView: View {
     @AppStorage(Settings.soundKey) private var sound = Settings.defaultSound
     @AppStorage(Settings.volumeKey) private var volume = Settings.defaultVolume
     @AppStorage(Settings.showPercentKey) private var showPercent = Settings.defaultShowPercent
+    @AppStorage(Settings.showInDockKey) private var showInDock = Settings.defaultShowInDock
 
     @State private var launchAtLogin = SMAppService.mainApp.status == .enabled
     @State private var loginError: String?
@@ -97,6 +98,14 @@ struct SettingsView: View {
             }
 
             Section("General") {
+                Toggle("Show in Dock", isOn: $showInDock)
+                    .onChange(of: showInDock) { _, visible in
+                        DockIcon.show(visible)
+                        // Hiding the Dock icon deactivates the app, which would drop this window
+                        // behind others; bring it back to the front
+                        NSApp.activate()
+                        NSApp.windows.filter { $0.isVisible && $0.canBecomeMain }.forEach { $0.makeKeyAndOrderFront(nil) }
+                    }
                 Toggle("Show percentage in menu bar", isOn: $showPercent)
                 // An explicit binding, so re-reading the status in onAppear can't re-trigger a write
                 Toggle("Launch at login", isOn: Binding(get: { launchAtLogin }, set: { setLaunchAtLogin($0) }))

@@ -9,6 +9,7 @@ enum Settings {
     static let soundKey = "sound"
     static let volumeKey = "volume"
     static let showPercentKey = "showPercent"
+    static let showInDockKey = "showInDock"
     static let didSetupLoginItemKey = "didSetupLoginItem"
 
     static let defaultThreshold = 40
@@ -18,6 +19,7 @@ enum Settings {
     static let defaultSound = "Sosumi"
     static let defaultVolume = 3.0
     static let defaultShowPercent = true
+    static let defaultShowInDock = false
 
     static let criticalOptions = [5, 10, 15, 20]
 
@@ -30,6 +32,7 @@ enum Settings {
             soundKey: defaultSound,
             volumeKey: defaultVolume,
             showPercentKey: defaultShowPercent,
+            showInDockKey: defaultShowInDock,
         ])
     }
 
@@ -43,4 +46,5 @@ enum Settings {
     static var style: String { UserDefaults.standard.string(forKey: styleKey) ?? defaultStyle }
     static var sound: String { UserDefaults.standard.string(forKey: soundKey) ?? "" }
     static var volume: Double { UserDefaults.standard.double(forKey: volumeKey) }
+    static var showInDock: Bool { UserDefaults.standard.bool(forKey: showInDockKey) }
 }
