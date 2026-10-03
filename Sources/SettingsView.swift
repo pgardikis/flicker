@@ -38,11 +38,15 @@ struct SettingsView: View {
                     Spacer()
                     Text("\(threshold)%").monospacedDigit().bold()
                 }
-                Slider(value: Binding(get: { Double(threshold) }, set: { threshold = Int($0) }), in: 5...95, step: 1)
+                // Re-check on release rather than on every step, so dragging past the current
+                // level doesn't fire a warning mid-drag
+                Slider(value: Binding(get: { Double(threshold) }, set: { threshold = Int($0) }), in: 5...95, step: 1) {
+                    if !$0 { monitor.refresh() }
+                }
             }
 
             VStack(alignment: .leading, spacing: 2) {
-                Picker("Critical level", selection: $critical) {
+                Picker("Critical level", selection: Binding(get: { critical }, set: { critical = $0; monitor.refresh() })) {
                     Text("Off").tag(0)
                     ForEach(Settings.criticalOptions.filter { $0 < threshold }, id: \.self) { Text("\($0)%").tag($0) }
                 }
@@ -61,6 +65,7 @@ struct SettingsView: View {
                 Text("Never").tag(0)
                 ForEach([1, 2, 5, 10], id: \.self) { Text("\($0)% drop").tag($0) }
             }
+            .onChange(of: remindEvery) { monitor.refresh() }
 
             Picker("Style", selection: $style) {
                 Text("Notification").tag("notification")

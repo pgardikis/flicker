@@ -63,7 +63,7 @@ Click the fuel pump icon in the menu bar to open the panel. Changes save instant
 - After the first warning, it reminds you again once the level drops another *Remind again every* amount (e.g. 39% → 34% → 29%).
 - Dropping below the *Critical level* always warns, even if the next reminder isn't due or reminders are off, and that warning is an alert.
 - Plugging in, or charging back above the threshold, resets it, so the next drop warns again.
-- The level is read immediately when macOS reports a power change, with a check every 60 seconds as a backup.
+- The level is read immediately when macOS reports a power change or you change a warning setting, with a check every 60 seconds as a backup.
 
 ## How it works
 
