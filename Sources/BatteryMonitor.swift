@@ -1,4 +1,5 @@
 import Foundation
+import IOKit
 import IOKit.ps
 
 /// Reads the battery state, listens for power changes, and decides when to warn.
@@ -26,6 +27,9 @@ final class BatteryMonitor: ObservableObject {
     private var notChargingSince: Date?
     private var settleTimer: Timer?
     private static let notChargingDelay: TimeInterval = 3
+    /// Re-reads while a time estimate is still missing, so the battery controller's figure
+    /// shows soon after it appears instead of at the next 60 s poll.
+    private var estimateTimer: Timer?
 
     var isMuted: Bool { mutedUntil != nil }
 
@@ -185,11 +189,16 @@ final class BatteryMonitor: ObservableObject {
 
             percent = current * 100 / max
             onBattery = desc[kIOPSPowerSourceStateKey] as? String == kIOPSBatteryPowerValue
-            minutesRemaining = desc[kIOPSTimeToEmptyKey] as? Int
+            // macOS's own estimate takes about two minutes after unplugging or plugging in. The
+            // battery controller has one after about one, and they agree, so it fills the gap.
+            minutesRemaining = Self.minutes(desc[kIOPSTimeToEmptyKey])
+                ?? (onBattery ? Self.controllerMinutesRemaining() : nil)
             isCharging = desc[kIOPSIsChargingKey] as? Bool ?? false
             isCharged = desc[kIOPSIsChargedKey] as? Bool ?? false
-            minutesToFull = desc[kIOPSTimeToFullChargeKey] as? Int
+            minutesToFull = Self.minutes(desc[kIOPSTimeToFullChargeKey])
+                ?? (isCharging ? Self.controllerMinutesRemaining() : nil)
             trackNotCharging(!onBattery && !isCharging && !isCharged)
+            waitForEstimate((onBattery && minutesRemaining == nil) || (isCharging && minutesToFull == nil))
             return
         }
 
@@ -201,6 +210,43 @@ final class BatteryMonitor: ObservableObject {
         isCharged = false
         minutesToFull = nil
         trackNotCharging(false)
+        waitForEstimate(false)
+    }
+
+    /// IOKit reports -1 for "no estimate yet" and 0 when the figure doesn't apply.
+    private static func minutes(_ value: Any?) -> Int? {
+        guard let minutes = value as? Int, minutes > 0 else { return nil }
+        return minutes
+    }
+
+    /// The battery controller's estimate: minutes to empty on battery, to full while charging.
+    /// 65535 means it has none yet.
+    private static func controllerMinutesRemaining() -> Int? {
+        let service = IOServiceGetMatchingService(kIOMainPortDefault, IOServiceMatching("AppleSmartBattery"))
+        guard service != 0 else { return nil }
+        defer { IOObjectRelease(service) }
+        guard let property = IORegistryEntryCreateCFProperty(service, "TimeRemaining" as CFString, kCFAllocatorDefault, 0),
+              let minutes = property.takeRetainedValue() as? Int,
+              minutes > 0, minutes < 65535
+        else { return nil }
+        return minutes
+    }
+
+    private func waitForEstimate(_ missing: Bool) {
+        guard missing else {
+            estimateTimer?.invalidate()
+            estimateTimer = nil
+            return
+        }
+        guard estimateTimer == nil else { return }
+        let timer = Timer(timeInterval: 10, repeats: false) { _ in
+            MainActor.assumeIsolated {
+                BatteryMonitor.shared.estimateTimer = nil
+                BatteryMonitor.shared.refresh()
+            }
+        }
+        RunLoop.main.add(timer, forMode: .common)
+        estimateTimer = timer
     }
 
     private func trackNotCharging(_ notCharging: Bool) {
