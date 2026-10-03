@@ -1,10 +1,10 @@
 #!/bin/bash
-# Builds Battery Notifier.app. Pass --install to copy it to /Applications and launch it.
+# Builds Flicker.app. Pass --install to copy it to /Applications and launch it.
 set -e
 
 cd "$(dirname "$0")"
 BUILD=build
-APP="$BUILD/Battery Notifier.app"
+APP="$BUILD/Flicker.app"
 
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
@@ -12,11 +12,11 @@ mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 echo "Compiling (universal: arm64 + x86_64)..."
 for arch in arm64 x86_64; do
   swiftc -O -parse-as-library -swift-version 6 -target "$arch-apple-macos14.0" \
-    Sources/*.swift -o "$BUILD/BatteryNotifier-$arch"
+    Sources/*.swift -o "$BUILD/Flicker-$arch"
 done
-lipo -create "$BUILD/BatteryNotifier-arm64" "$BUILD/BatteryNotifier-x86_64" \
-  -output "$APP/Contents/MacOS/BatteryNotifier"
-rm -f "$BUILD/BatteryNotifier-arm64" "$BUILD/BatteryNotifier-x86_64"
+lipo -create "$BUILD/Flicker-arm64" "$BUILD/Flicker-x86_64" \
+  -output "$APP/Contents/MacOS/Flicker"
+rm -f "$BUILD/Flicker-arm64" "$BUILD/Flicker-x86_64"
 
 echo "Making icon..."
 swiftc -O make-icon.swift -o "$BUILD/make-icon"
@@ -33,19 +33,19 @@ codesign --force --options runtime --sign - "$APP"
 echo "Built $APP"
 
 if [ "$1" = "--install" ]; then
-  INSTALLED="/Applications/Battery Notifier.app"
+  INSTALLED="/Applications/Flicker.app"
 
   # Quit the old instance and wait for it to exit (force quit after 5s)
-  pkill -x BatteryNotifier 2>/dev/null || true
-  for _ in $(seq 25); do pgrep -x BatteryNotifier >/dev/null || break; sleep 0.2; done
-  pkill -9 -x BatteryNotifier 2>/dev/null || true
+  pkill -x Flicker 2>/dev/null || true
+  for _ in $(seq 25); do pgrep -x Flicker >/dev/null || break; sleep 0.2; done
+  pkill -9 -x Flicker 2>/dev/null || true
 
   rm -rf "$INSTALLED"
   cp -R "$APP" /Applications/
 
   # Launch Services may need a moment to register the new copy (error -600), so retry
   for attempt in 1 2 3 4 5; do
-    if open "$INSTALLED" 2>/dev/null && sleep 1 && pgrep -x BatteryNotifier >/dev/null; then
+    if open "$INSTALLED" 2>/dev/null && sleep 1 && pgrep -x Flicker >/dev/null; then
       echo "Installed to /Applications and launched"
       exit 0
     fi

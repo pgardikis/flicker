@@ -1,10 +1,10 @@
-# Battery Notifier
+# Flicker
 
 A lightweight macOS menu bar app that warns you when your MacBook's battery runs low.
 
-macOS only warns when the battery is nearly empty, at a level you can't change. Battery Notifier warns at the level you choose, reminds you as the battery keeps dropping, plays a sound loud enough to notice, and can show alerts that get through Focus.
+macOS only warns when the battery is nearly empty, at a level you can't change. Flicker warns at the level you choose, reminds you as the battery keeps dropping, plays a sound loud enough to notice, and can show alerts that get through Focus.
 
-![Battery Notifier in light and dark mode. Top row: the menu bar panel, showing 45% on battery with 1:30 remaining, battery health Normal, maximum capacity 80% and 1,054 cycles, a summary of the warning settings, and Settings, Test and Quit buttons. Bottom row: the Settings window, with Warnings (warn below 40%, critical level 10%, remind every 5% drop), Alert (notification style, Sosumi sound, 300% volume) and General (show in Dock, percentage in menu bar, launch at login) sections.](docs/images/screenshots.png)
+![Flicker in light and dark mode. Top row: the menu bar panel, showing 45% on battery with 1:30 remaining, battery health Normal, maximum capacity 80% and 1,054 cycles, a summary of the warning settings, and Settings, Test and Quit buttons. Bottom row: the Settings window, with Warnings (warn below 40%, critical level 10%, remind every 5% drop), Alert (notification style, Sosumi sound, 300% volume) and General (show in Dock, percentage in menu bar, launch at login) sections.](docs/images/screenshots.png)
 
 ## Features
 
@@ -23,8 +23,8 @@ macOS only warns when the battery is nearly empty, at a level you can't change. 
 You need a MacBook (Intel or Apple Silicon) with macOS 14 (Sonoma) or later, plus the Xcode Command Line Tools (`xcode-select --install`). The full Xcode app isn't needed.
 
 ```bash
-git clone https://github.com/pgardikis/battery-notifier-macos.git
-cd battery-notifier-macos
+git clone https://github.com/pgardikis/flicker.git
+cd flicker
 ./build.sh --install    # builds, copies to /Applications and launches
 ```
 
@@ -64,7 +64,7 @@ The menu bar icon fills with a "!" while the battery is low, and is crossed out 
 
 ## Troubleshooting
 
-**No notification appears.** Allow notifications for Battery Notifier in System Settings → Notifications, then try the panel's **Test** button.
+**No notification appears.** Allow notifications for Flicker in System Settings → Notifications, then try the panel's **Test** button.
 
 **Nothing appears during Focus or Do Not Disturb.** Letting notifications through Focus needs an entitlement that only a paid Apple Developer Program membership can provide. Set **Style** to **Alert** instead: alerts aren't affected by Focus. Critical warnings are always alerts.
 
@@ -75,9 +75,9 @@ The menu bar icon fills with a "!" while the battery is low, and is crossed out 
 ## Uninstall
 
 1. Click the charging station and choose **Quit**
-2. Remove **Battery Notifier** in System Settings → General → Login Items
-3. Delete `/Applications/Battery Notifier.app`
-4. Delete its settings: `defaults delete local.batterynotify`
+2. Remove **Flicker** in System Settings → General → Login Items
+3. Delete `/Applications/Flicker.app`
+4. Delete its settings: `defaults delete io.github.pgardikis.flicker`
 5. Delete the folder you cloned
 
 ## Technical details

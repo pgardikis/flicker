@@ -3,7 +3,7 @@ import SwiftUI
 import UserNotifications
 
 @main
-struct BatteryNotifierApp: App {
+struct FlickerApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @StateObject private var monitor = BatteryMonitor.shared
     @AppStorage(Settings.showPercentKey) private var showPercent = Settings.defaultShowPercent

@@ -1,13 +1,13 @@
-# How Battery Notifier works
+# How Flicker works
 
 The technical side of the app: how it reads the battery, how it decides when to warn, how `build.sh` assembles the app without Xcode, where it keeps its files, and its security model. For installing and using the app, see the [README](../README.md).
 
 ## Project structure
 
 ```
-battery-notifier-macos/
+flicker/
 ├── Sources/
-│   ├── BatteryNotifierApp.swift   App entry, menu bar icon, launch at login, notification setup
+│   ├── FlickerApp.swift           App entry, menu bar icon, launch at login, notification setup
 │   ├── DockIcon.swift             The optional Dock icon and opening the panel from it
 │   ├── BatteryMonitor.swift       Reads the battery and decides when to warn
 │   ├── Notifier.swift             Shows notifications and alerts, plays sounds
@@ -43,10 +43,10 @@ Test warnings from the panel ignore all of this and always fire.
 - **Status line**: "Not charging" (macOS holding the charge, for example at 80%) only shows once it has lasted 3 seconds, since macOS reports that state for a moment on every plug and unplug. Until a time estimate exists, the panel says "Calculating…".
 - **Faster time estimates**: macOS's own estimate takes about two minutes after unplugging or plugging in. Until then the time comes from the battery controller's `TimeRemaining` in the I/O Registry (`AppleSmartBattery`), which produces an estimate after about a minute, matching the one macOS shows later.
 - **Battery health**: the health rating, maximum capacity and cycle count come from `/usr/sbin/system_profiler SPPowerDataType -json`, read at launch and whenever the panel opens, so they match System Settings. IOKit only exposes raw mAh figures, and its own health rating can disagree (it may say Poor where System Settings says Normal).
-- **Notifications**: sent with Apple's `UserNotifications` framework. Each warning reuses one identifier, so a reminder replaces the previous banner instead of stacking. Focus can hide them (see [Known limits](#known-limits)). If notification permission isn't granted, the app falls back to AppleScript's `display notification`; macOS delivers that banner as Script Editor's, with its name and icon, so it follows Script Editor's notification setting rather than Battery Notifier's.
+- **Notifications**: sent with Apple's `UserNotifications` framework. Each warning reuses one identifier, so a reminder replaces the previous banner instead of stacking. Focus can hide them (see [Known limits](#known-limits)). If notification permission isn't granted, the app falls back to AppleScript's `display notification`; macOS delivers that banner as Script Editor's, with its name and icon, so it follows Script Editor's notification setting rather than Flicker's.
 - **Alerts**: a standard `NSAlert` warning dialog. A critical warning uses the critical alert style.
 - **Sound**: played with `/usr/bin/afplay` instead of the notification sound. Notification sounds are capped by the system *alert volume*, while `afplay` follows your *output volume* and supports a boost multiplier.
-- **Settings**: stored in `UserDefaults` (`~/Library/Preferences/local.batterynotify.plist`).
+- **Settings**: stored in `UserDefaults` (`~/Library/Preferences/io.github.pgardikis.flicker.plist`).
 - **Settings window placement**: it reopens where you left it, as macOS windows do, but only if that spot is on the screen whose menu bar you clicked. Otherwise (the first time, another display, or one that's been disconnected) it opens centred on that screen.
 - **Launch at login**: registered with `SMAppService.mainApp`.
 - **Single instance**: a second copy (say the one in `build/`) sees the running one by bundle ID and quits at launch, so there are never two icons or duplicate warnings. Run the app from `/Applications`.
@@ -57,13 +57,13 @@ Test warnings from the panel ignore all of this and always fire.
 
 A `.app` is a folder with a fixed layout. Without Xcode, the script builds it by hand:
 
-1. Compiles `Sources/*.swift` with `swiftc` once per architecture, then merges them with `lipo` into a universal `Battery Notifier.app/Contents/MacOS/BatteryNotifier`
+1. Compiles `Sources/*.swift` with `swiftc` once per architecture, then merges them with `lipo` into a universal `Flicker.app/Contents/MacOS/Flicker`
 2. Draws the icon with `make-icon.swift`, then converts it to `AppIcon.icns` with `iconutil`
 3. Copies `Info.plist` into the bundle
 4. Signs the app with an ad-hoc signature and **hardened runtime** (`codesign --options runtime --sign -`). macOS requires a signature before an app can send notifications or launch at login.
 5. With `--install`, it:
    - quits any running copy, and force-quits it if it's still running after 5 seconds
-   - replaces `/Applications/Battery Notifier.app`
+   - replaces `/Applications/Flicker.app`
    - launches the new copy, retrying up to 5 times in case macOS hasn't registered it yet (error -600)
 
 ## Screenshots
@@ -76,10 +76,10 @@ A `.app` is a folder with a fixed layout. Without Xcode, the script builds it by
 |---|---|
 | Your clone of this repo | Source code. The app doesn't need it to run |
 | `build/` in your clone | The freshly built app, before `--install` copies it |
-| `/Applications/Battery Notifier.app` | The installed app |
-| `~/Library/Preferences/local.batterynotify.plist` | Saved settings |
+| `/Applications/Flicker.app` | The installed app |
+| `~/Library/Preferences/io.github.pgardikis.flicker.plist` | Saved settings |
 | System Settings → General → Login Items | Launch-at-login entry |
-| System Settings → Notifications → Battery Notifier | Notification permission |
+| System Settings → Notifications → Flicker | Notification permission |
 
 ## Security
 
