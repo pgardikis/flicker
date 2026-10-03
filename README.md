@@ -73,7 +73,7 @@ Click the fuel pump icon in the menu bar to open the panel, then **Settings…**
 ### Project structure
 
 ```
-battery-notify/
+battery-notifier-macos/
 ├── Sources/
 │   ├── BatteryNotifierApp.swift   App entry, menu bar icon, launch at login, notification setup
 │   ├── BatteryMonitor.swift     Reads the battery and decides when to warn
@@ -117,7 +117,7 @@ A `.app` is a folder with a fixed layout. Without Xcode, the script builds it by
 
 | Location | What it is |
 |---|---|
-| `~/workspace/battery-notify/` | Source code. The app doesn't need it to run |
+| Your clone of this repo | Source code. The app doesn't need it to run |
 | `/Applications/Battery Notifier.app` | The installed app |
 | `~/Library/Preferences/local.batterynotify.plist` | Saved settings |
 | System Settings → General → Login Items | Launch-at-login entry |
