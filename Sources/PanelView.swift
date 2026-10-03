@@ -161,8 +161,9 @@ struct PanelView: View {
         let panel = NSApp.keyWindow
         // The screen whose menu bar was clicked, read before the panel closes
         let screen = panel?.screen ?? NSScreen.main
-        // A menu bar app isn't frontmost, so without activating, the window opens behind others
-        NSApp.activate(ignoringOtherApps: true)
+        // A menu bar app isn't frontmost, so without activating, the window opens behind others.
+        // The click on Settings… is what lets macOS agree to it.
+        NSApp.activate()
         openSettings()
         panel?.close()
         DispatchQueue.main.async {

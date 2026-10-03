@@ -63,7 +63,9 @@ enum Notifier {
         alertShowing = true
         defer { alertShowing = false }
 
-        NSApp.activate(ignoringOtherApps: true)
+        // Asks to come forward; macOS may decline while the user works in another app, which is
+        // fine: a modal alert floats above other apps' windows either way, without taking focus
+        NSApp.activate()
         let alert = NSAlert()
         alert.alertStyle = critical ? .critical : .warning
         alert.messageText = title
