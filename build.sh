@@ -35,16 +35,11 @@ echo "Built $APP"
 if [ "$1" = "--install" ]; then
   INSTALLED="/Applications/Battery Notifier.app"
 
-  # Quit the old instance and wait for it to exit (force quit after 5s). BatteryNotify is the
-  # executable's name from before the app was renamed to Battery Notifier.
-  for name in BatteryNotifier BatteryNotify; do
-    pkill -x "$name" 2>/dev/null || true
-    for _ in $(seq 25); do pgrep -x "$name" >/dev/null || break; sleep 0.2; done
-    pkill -9 -x "$name" 2>/dev/null || true
-  done
+  # Quit the old instance and wait for it to exit (force quit after 5s)
+  pkill -x BatteryNotifier 2>/dev/null || true
+  for _ in $(seq 25); do pgrep -x BatteryNotifier >/dev/null || break; sleep 0.2; done
+  pkill -9 -x BatteryNotifier 2>/dev/null || true
 
-  # Same bundle ID, so leaving the old copy would mean two apps fighting over one identity
-  rm -rf "/Applications/Battery Notify.app"
   rm -rf "$INSTALLED"
   cp -R "$APP" /Applications/
 
