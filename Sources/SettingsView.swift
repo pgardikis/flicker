@@ -16,11 +16,17 @@ struct SettingsView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             header
-            if let healthText = monitor.healthText {
-                Label(healthText, systemImage: monitor.healthNeedsAttention
-                    ? "exclamationmark.triangle.fill" : "checkmark.seal")
-                    .font(.caption)
-                    .foregroundStyle(monitor.healthNeedsAttention ? .orange : .secondary)
+            if monitor.percent != nil, let healthText = monitor.healthText {
+                Label {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(healthText).foregroundStyle(monitor.healthIsNormal ? .green : .red)
+                        if let capacityLine { capacityLine }
+                    }
+                } icon: {
+                    Image(systemName: monitor.healthIsNormal ? "checkmark.seal.fill" : "exclamationmark.triangle.fill")
+                        .foregroundStyle(monitor.healthIsNormal ? .green : .red)
+                }
+                .font(.caption)
             }
             Divider()
 
@@ -86,6 +92,7 @@ struct SettingsView: View {
         .frame(width: 300)
         .onAppear {
             monitor.refresh()
+            monitor.refreshDetails()
             // System Settings can change this behind our back, so re-read on every open
             launchAtLogin = SMAppService.mainApp.status == .enabled
         }
@@ -100,6 +107,29 @@ struct SettingsView: View {
                 Text(monitor.percent.map { "\($0)%" } ?? "—").font(.title2.bold())
                 Text(monitor.statusText).font(.caption).foregroundStyle(.secondary)
             }
+        }
+    }
+
+    /// Maximum capacity colored by wear, followed by the cycle count. nil when neither is known.
+    private var capacityLine: Text? {
+        var parts: [Text] = []
+        if let capacity = monitor.maximumCapacityPercent {
+            parts.append(Text("Maximum capacity \(capacity)%").foregroundStyle(capacityColor(capacity)))
+        }
+        if let cycles = monitor.details?.cycleCount {
+            parts.append(Text("\(cycles.formatted()) cycles").foregroundStyle(.secondary))
+        }
+        guard let first = parts.first else { return nil }
+        return parts.dropFirst().reduce(first) { $0 + Text(" · ").foregroundStyle(.secondary) + $1 }
+    }
+
+    /// Apple designs batteries to keep about 80% capacity at their rated cycle count.
+    /// Orange rather than yellow, which is hard to read on the light-mode panel.
+    private func capacityColor(_ capacity: Int) -> Color {
+        switch capacity {
+        case 80...: return .green
+        case 60..<80: return .orange
+        default: return .red
         }
     }
 

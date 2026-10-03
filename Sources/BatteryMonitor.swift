@@ -9,8 +9,7 @@ final class BatteryMonitor: ObservableObject {
     @Published private(set) var percent: Int?
     @Published private(set) var onBattery = false
     @Published private(set) var minutesRemaining: Int?
-    @Published private(set) var health: String?
-    @Published private(set) var healthCondition: String?
+    @Published private(set) var details: BatteryDetails?
 
     /// Percentage at the last warning; nil once charging or back above the threshold.
     private var lastWarned: Int?
@@ -40,21 +39,23 @@ final class BatteryMonitor: ObservableObject {
         return "On battery · \(minutes / 60):\(String(format: "%02d", minutes % 60)) remaining"
     }
 
-    /// nil when macOS reports no health for this battery.
+    /// nil until system_profiler has answered, or when it reports no health for this battery.
     var healthText: String? {
-        guard let health else { return nil }
-        guard let healthCondition, !healthCondition.isEmpty else { return "Battery health: \(health)" }
-        return "Battery health: \(health) · \(healthCondition)"
+        guard let health = details?.health else { return nil }
+        // system_profiler's JSON says "Good" where System Settings shows "Normal"
+        return "Battery health: \(health == "Good" ? "Normal" : health)"
     }
 
-    var healthNeedsAttention: Bool {
-        if let healthCondition, !healthCondition.isEmpty { return true }
-        guard let health else { return false }
-        return health != kIOPSGoodValue
+    var healthIsNormal: Bool { details?.health == "Good" }
+
+    /// system_profiler reports maximum capacity as text such as "80%".
+    var maximumCapacityPercent: Int? {
+        details?.maximumCapacity.flatMap { Int($0.trimmingCharacters(in: CharacterSet(charactersIn: "% "))) }
     }
 
     func start() {
         refresh()
+        refreshDetails()
 
         // Instant updates when the power source or level changes
         let context = Unmanaged.passUnretained(self).toOpaque()
@@ -80,6 +81,16 @@ final class BatteryMonitor: ObservableObject {
         evaluate()
     }
 
+    /// Health, maximum capacity and cycle count barely move, so they're read on launch and when
+    /// the panel opens rather than on every refresh. They come from system_profiler so they match
+    /// System Settings: IOKit only has raw mAh figures, and its health rating can disagree.
+    func refreshDetails() {
+        Task.detached {
+            let details = Self.readDetails()
+            await MainActor.run { self.details = details }
+        }
+    }
+
     func sendTest() {
         readBattery()
         Notifier.warn(percent: percent ?? 0, threshold: Settings.threshold, minutesRemaining: minutesRemaining)
@@ -100,8 +111,6 @@ final class BatteryMonitor: ObservableObject {
             percent = current * 100 / max
             onBattery = desc[kIOPSPowerSourceStateKey] as? String == kIOPSBatteryPowerValue
             minutesRemaining = desc[kIOPSTimeToEmptyKey] as? Int
-            health = desc[kIOPSBatteryHealthKey] as? String
-            healthCondition = desc[kIOPSBatteryHealthConditionKey] as? String
             return
         }
 
@@ -109,8 +118,27 @@ final class BatteryMonitor: ObservableObject {
         percent = nil
         onBattery = false
         minutesRemaining = nil
-        health = nil
-        healthCondition = nil
+    }
+
+    private nonisolated static func readDetails() -> BatteryDetails? {
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/sbin/system_profiler")
+        process.arguments = ["SPPowerDataType", "-json"]
+        let pipe = Pipe()
+        process.standardOutput = pipe
+        process.standardError = FileHandle.nullDevice
+        guard (try? process.run()) != nil else { return nil }
+        let data = pipe.fileHandleForReading.readDataToEndOfFile()
+        process.waitUntilExit()
+
+        guard let root = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let items = root["SPPowerDataType"] as? [[String: Any]],
+              let health = items.lazy.compactMap({ $0["sppower_battery_health_info"] as? [String: Any] }).first
+        else { return nil }
+        return BatteryDetails(
+            health: health["sppower_battery_health"] as? String,
+            maximumCapacity: health["sppower_battery_health_maximum_capacity"] as? String,
+            cycleCount: health["sppower_battery_cycle_count"] as? Int)
     }
 
     private func evaluate() {
@@ -131,4 +159,11 @@ final class BatteryMonitor: ObservableObject {
         lastWarned = percent
         Notifier.warn(percent: percent, threshold: threshold, minutesRemaining: minutesRemaining)
     }
+}
+
+/// Battery health as System Settings shows it, read from system_profiler.
+struct BatteryDetails: Sendable {
+    let health: String?
+    let maximumCapacity: String?
+    let cycleCount: Int?
 }

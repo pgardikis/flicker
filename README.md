@@ -12,7 +12,7 @@ It lives in the menu bar as a ⛽ fuel pump icon, checks the battery level in th
 - **Sound**: any macOS system sound, with a preview button and a volume boost up to 4×
 - **Launch at login**
 - **Live battery status**: percentage, charging state and time remaining in the panel
-- **Battery health**: shows macOS's health rating, and flags it when it needs attention
+- **Battery health**: shows the health rating, maximum capacity and cycle count as System Settings reports them. The rating is green when Normal and red otherwise. Maximum capacity is green from 80%, orange from 60% and red below that, since Apple designs batteries to keep about 80% at their rated cycle count
 - **Send Test Warning** button to check your settings
 
 The fuel pump becomes filled with a "!" while the battery is below your threshold.
@@ -81,6 +81,7 @@ battery-notify/
 ### Components
 
 - **Battery reading**: `BatteryMonitor` uses macOS's IOKit power source API (`IOPSCopyPowerSourcesInfo`) to get the charge level, whether it's on battery, and time remaining. `IOPSNotificationCreateRunLoopSource` delivers instant updates, and a 60-second timer backs it up.
+- **Battery health**: the health rating, maximum capacity and cycle count come from `/usr/sbin/system_profiler SPPowerDataType -json`, read at launch and whenever the panel opens, so they match System Settings. IOKit only exposes raw mAh figures, and its own health rating can disagree (it may say Poor where System Settings says Normal).
 - **Notifications**: sent with Apple's `UserNotifications` framework. Each warning reuses one identifier, so a reminder replaces the previous banner instead of stacking. If notification permission isn't granted, the app falls back to AppleScript's `display notification`. The code asks for a *time sensitive* interruption level, but macOS ignores that without a Developer ID (see Known limits), so notifications are suppressed by Focus.
 - **Alerts**: a standard `NSAlert` warning dialog.
 - **Sound**: played with `/usr/bin/afplay` instead of the notification sound. Notification sounds are capped by the system *alert volume*. `afplay` follows your *output volume* and supports a boost multiplier.
