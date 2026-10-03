@@ -13,12 +13,13 @@ battery-notifier-macos/
 │   ├── PanelView.swift            The menu bar panel: status, health and a settings summary
 │   ├── SettingsView.swift         The Settings window
 │   └── Settings.swift             Setting keys and defaults
-├── docs/                          This file, the screenshots and compose.swift
+├── docs/                          This file, the screenshots and the scripts that make them
 ├── build/                         Created by build.sh, not stored in git
 ├── Info.plist                     App metadata (menu bar only, no Dock icon)
 ├── make-icon.swift                Draws the app icon
 ├── build.sh                       Build, sign and install script
 ├── README.md                      Install and usage
+├── AGENTS.md                      Instructions for AI coding agents
 ├── LICENSE                        MIT
 └── .gitignore
 ```
@@ -63,6 +64,10 @@ A `.app` is a folder with a fixed layout. Without Xcode, the script builds it by
    - replaces `/Applications/Battery Notifier.app`
    - launches the new copy, retrying up to 5 times in case macOS hasn't registered it yet (error -600)
 
+## Screenshots
+
+`docs/images/update-screenshots.sh` re-renders the panel images straight from `PanelView` at 3x and rebuilds `screenshots.png` with `compose.swift`, which enlarges the panel to the Settings window's width. The Settings window images are real captures, since a window drawn by a background process renders its controls as inactive: capture the window while it's active, crop it to the window, and run the script again.
+
 ## Where the app keeps things
 
 | Location | What it is |
@@ -94,6 +99,6 @@ What it does on your Mac:
 
 ### Known limits
 
-- **Ad-hoc signed, not notarized**: a copy built on one Mac and moved to another is blocked by Gatekeeper, so build it on each Mac. Distributing a ready-built app needs a paid Apple Developer Program membership, a Developer ID certificate and notarization.
+- **Ad-hoc signed, not notarized**: a copy built on one Mac and moved to another is usually blocked by Gatekeeper, which checks apps that arrive with macOS's download flag (downloaded, AirDropped or emailed), so build it on each Mac. Distributing a ready-built app needs a paid Apple Developer Program membership, a Developer ID certificate and notarization.
 - **No entitlements, so Focus wins**: `com.apple.developer.usernotifications.time-sensitive` would let low battery warnings pierce Focus, but it has to be authorised by a provisioning profile, which needs a paid Apple Developer Program membership. Embedding it in an ad-hoc signature anyway makes AMFI (Apple Mobile File Integrity) refuse to launch the app (`Launchd job spawn failed`, POSIX 163). Use **Style = Alert** instead.
 - **Not sandboxed**: the sandbox would complicate launching `afplay` and `system_profiler`, an acceptable trade-off for a tool you build from source.
