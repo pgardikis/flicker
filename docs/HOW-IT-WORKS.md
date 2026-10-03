@@ -27,21 +27,21 @@ battery-notifier-macos/
 
 `BatteryMonitor` re-evaluates every time it reads the battery: when macOS reports a power change, when a warning setting changes, and every 60 seconds as a backup.
 
-- **It warns only on battery and below *Warn below*.** Otherwise it forgets the last warning, so the next drop below the threshold warns again. Plugging in or charging back above the threshold is what resets it.
+- **It warns only on battery and below *Warn below*.** Otherwise it forgets the last warning, so the next drop below the threshold warns again. That happens when you plug in, or when you lower *Warn below* under the current level while on battery.
 - **It remembers one number between warnings**: the percentage at the last warning. A reminder is due once the battery has dropped another *Remind again every* below that number. With reminders set to Never, it warns once.
-- **The critical level breaks through.** Dropping from above the critical level to below it always warns, even if no reminder is due or reminders are off, and that warning is always an alert. Below the critical level, further reminders are critical too.
+- **The critical level breaks through.** Any warning while the battery is below the critical level is a critical alert, including the first one when you unplug or start the app already below it. Dropping into the critical level also always warns, even if no reminder is due or reminders are off.
 - **Mute holds warnings back without losing them.** While muted, a non-critical warning is skipped before the remembered percentage is updated. When the mute ends, the app re-evaluates straight away, so a warning that came due meanwhile fires then. A mute ends when its timer runs out, when you click Unmute, or when you plug in, and it's kept in memory only, so quitting the app clears it.
-- **One alert at a time.** An alert waits for you to click OK, so a warning that arrives while one is open doesn't stack a second dialog.
+- **One alert at a time.** An alert waits for you to click OK. A warning that arrives while one is open still plays its sound, but its dialog is dropped rather than shown afterwards, so dialogs never stack.
 
 Test warnings from the panel ignore all of this and always fire.
 
 ## Implementation notes
 
-- **Battery reading**: `BatteryMonitor` uses macOS's IOKit power source API (`IOPSCopyPowerSourcesInfo`) to get the charge level, whether it's on battery or charging, and the time remaining. `IOPSNotificationCreateRunLoopSource` delivers instant updates, and a 60-second timer backs it up.
+- **Battery reading**: `BatteryMonitor` uses macOS's IOKit power source API (`IOPSCopyPowerSourcesInfo`) to get the charge level, whether it's on battery or charging, and the time remaining. `IOPSNotificationCreateRunLoopSource` delivers instant updates.
 - **Status line**: "Not charging" (macOS holding the charge, for example at 80%) only shows once it has lasted 3 seconds, since macOS reports that state for a moment on every plug and unplug. Until a time estimate exists, the panel says "Calculating…".
-- **Faster time estimates**: macOS's own estimate takes about two minutes after unplugging or plugging in. Until then the time comes from the battery controller's `TimeRemaining` in the I/O Registry (`AppleSmartBattery`), which has one after about a minute and agrees with macOS.
+- **Faster time estimates**: macOS's own estimate takes about two minutes after unplugging or plugging in. Until then the time comes from the battery controller's `TimeRemaining` in the I/O Registry (`AppleSmartBattery`), which produces an estimate after about a minute, matching the one macOS shows later.
 - **Battery health**: the health rating, maximum capacity and cycle count come from `/usr/sbin/system_profiler SPPowerDataType -json`, read at launch and whenever the panel opens, so they match System Settings. IOKit only exposes raw mAh figures, and its own health rating can disagree (it may say Poor where System Settings says Normal).
-- **Notifications**: sent with Apple's `UserNotifications` framework. Each warning reuses one identifier, so a reminder replaces the previous banner instead of stacking. Focus can hide them (see [Known limits](#known-limits)). If notification permission isn't granted, the app falls back to AppleScript's `display notification`; that banner normally appears under Script Editor's name, and only if Script Editor is allowed to send notifications.
+- **Notifications**: sent with Apple's `UserNotifications` framework. Each warning reuses one identifier, so a reminder replaces the previous banner instead of stacking. Focus can hide them (see [Known limits](#known-limits)). If notification permission isn't granted, the app falls back to AppleScript's `display notification`; macOS delivers that banner as Script Editor's, with its name and icon, so it follows Script Editor's notification setting rather than Battery Notifier's.
 - **Alerts**: a standard `NSAlert` warning dialog. A critical warning uses the critical alert style.
 - **Sound**: played with `/usr/bin/afplay` instead of the notification sound. Notification sounds are capped by the system *alert volume*, while `afplay` follows your *output volume* and supports a boost multiplier.
 - **Settings**: stored in `UserDefaults` (`~/Library/Preferences/local.batterynotify.plist`).
@@ -81,7 +81,7 @@ The app is intentionally minimal: no network access, no root or admin privileges
 What it does on your Mac:
 
 - **Reads the battery** through IOKit and the I/O Registry (`AppleSmartBattery`), read-only.
-- **Runs three Apple tools**, always by fixed path with fixed arguments: `/usr/sbin/system_profiler` for battery health, `/usr/bin/afplay` for the warning sound, and `/usr/bin/osascript` for the backup notification.
+- **Runs three Apple tools**, always by fixed path: `/usr/sbin/system_profiler` for battery health, `/usr/bin/afplay` for the warning sound, and `/usr/bin/osascript` for the backup notification. The only inputs that vary are the checked sound name, the volume and the notification text.
 - **Shows notifications and alerts.**
 - **Registers itself as a login item**, which you can turn off in Settings or System Settings.
 - **Stores its settings** in its own preferences file.

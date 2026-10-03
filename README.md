@@ -4,10 +4,10 @@ A lightweight macOS menu bar app that warns you when your MacBook's battery runs
 
 macOS only warns once, at a level it picks. Battery Notifier warns at the level you choose, reminds you as the battery keeps dropping, plays a sound loud enough to notice, and can show alerts that get through Focus.
 
-| Light | Dark |
-|---|---|
-| <img src="docs/images/panel-light.png" width="340" alt="Battery Notifier panel in light mode"> | <img src="docs/images/panel-dark.png" width="340" alt="Battery Notifier panel in dark mode"> |
-| <img src="docs/images/settings-light.png" width="340" alt="Settings window in light mode"> | <img src="docs/images/settings-dark.png" width="340" alt="Settings window in dark mode"> |
+| | Light | Dark |
+|---|---|---|
+| **Menu bar panel** | <img src="docs/images/panel-light.png" width="300" alt="Battery Notifier panel in light mode"> | <img src="docs/images/panel-dark.png" width="300" alt="Battery Notifier panel in dark mode"> |
+| **Settings window** | <img src="docs/images/settings-light.png" width="300" alt="Settings window in light mode"> | <img src="docs/images/settings-dark.png" width="300" alt="Settings window in dark mode"> |
 
 ## Features
 
@@ -84,7 +84,7 @@ The menu bar icon fills with a "!" while the battery is low, and is crossed out 
 
 ## Technical details
 
-How the app reads the battery, how `build.sh` builds it without Xcode, where it keeps files, and its security model are covered in [docs/HOW-IT-WORKS.md](docs/HOW-IT-WORKS.md).
+How the app reads the battery, how it decides when to warn, how `build.sh` builds it without Xcode, where it keeps files, and its security model are covered in [docs/HOW-IT-WORKS.md](docs/HOW-IT-WORKS.md).
 
 ## License
 
