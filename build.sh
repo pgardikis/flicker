@@ -1,10 +1,10 @@
 #!/bin/bash
-# Builds Battery Notify.app. Pass --install to copy it to /Applications and launch it.
+# Builds Battery Notifier.app. Pass --install to copy it to /Applications and launch it.
 set -e
 
 cd "$(dirname "$0")"
 BUILD=build
-APP="$BUILD/Battery Notify.app"
+APP="$BUILD/Battery Notifier.app"
 
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
@@ -12,11 +12,11 @@ mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 echo "Compiling (universal: arm64 + x86_64)..."
 for arch in arm64 x86_64; do
   swiftc -O -parse-as-library -swift-version 6 -target "$arch-apple-macos14.0" \
-    Sources/*.swift -o "$BUILD/BatteryNotify-$arch"
+    Sources/*.swift -o "$BUILD/BatteryNotifier-$arch"
 done
-lipo -create "$BUILD/BatteryNotify-arm64" "$BUILD/BatteryNotify-x86_64" \
-  -output "$APP/Contents/MacOS/BatteryNotify"
-rm -f "$BUILD/BatteryNotify-arm64" "$BUILD/BatteryNotify-x86_64"
+lipo -create "$BUILD/BatteryNotifier-arm64" "$BUILD/BatteryNotifier-x86_64" \
+  -output "$APP/Contents/MacOS/BatteryNotifier"
+rm -f "$BUILD/BatteryNotifier-arm64" "$BUILD/BatteryNotifier-x86_64"
 
 echo "Making icon..."
 swiftc -O make-icon.swift -o "$BUILD/make-icon"
@@ -33,19 +33,24 @@ codesign --force --options runtime --sign - "$APP"
 echo "Built $APP"
 
 if [ "$1" = "--install" ]; then
-  INSTALLED="/Applications/Battery Notify.app"
+  INSTALLED="/Applications/Battery Notifier.app"
 
-  # Quit the old instance and wait for it to exit (force quit after 5s)
-  pkill -x BatteryNotify 2>/dev/null || true
-  for _ in $(seq 25); do pgrep -x BatteryNotify >/dev/null || break; sleep 0.2; done
-  pkill -9 -x BatteryNotify 2>/dev/null || true
+  # Quit the old instance and wait for it to exit (force quit after 5s). BatteryNotify is the
+  # executable's name from before the app was renamed to Battery Notifier.
+  for name in BatteryNotifier BatteryNotify; do
+    pkill -x "$name" 2>/dev/null || true
+    for _ in $(seq 25); do pgrep -x "$name" >/dev/null || break; sleep 0.2; done
+    pkill -9 -x "$name" 2>/dev/null || true
+  done
 
+  # Same bundle ID, so leaving the old copy would mean two apps fighting over one identity
+  rm -rf "/Applications/Battery Notify.app"
   rm -rf "$INSTALLED"
   cp -R "$APP" /Applications/
 
   # Launch Services may need a moment to register the new copy (error -600), so retry
   for attempt in 1 2 3 4 5; do
-    if open "$INSTALLED" 2>/dev/null && sleep 1 && pgrep -x BatteryNotify >/dev/null; then
+    if open "$INSTALLED" 2>/dev/null && sleep 1 && pgrep -x BatteryNotifier >/dev/null; then
       echo "Installed to /Applications and launched"
       exit 0
     fi

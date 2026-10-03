@@ -1,4 +1,4 @@
-# Battery Notify
+# Battery Notifier
 
 A lightweight macOS menu bar app that warns you when your battery drops below a percentage you choose.
 
@@ -32,14 +32,14 @@ You don't need the full Xcode app.
 ## Build and install
 
 ```bash
-./build.sh            # build only → build/Battery Notify.app
+./build.sh            # build only → build/Battery Notifier.app
 ./build.sh --install  # build, copy to /Applications, and launch
 ```
 
 Run `./build.sh --install` again after any code change. It quits the running copy, replaces it and relaunches.
 
 On first launch:
-- macOS asks to **allow notifications** for Battery Notify. Click Allow.
+- macOS asks to **allow notifications** for Battery Notifier. Click Allow.
 - The app turns on **launch at login**, and macOS may show a "Background item added" notice.
 
 Always run the app from `/Applications`. If a second copy is opened (say the one in `build/`), it notices the running instance and quits immediately, so you won't get two icons or duplicate warnings.
@@ -75,7 +75,7 @@ Click the fuel pump icon in the menu bar to open the panel, then **Settings…**
 ```
 battery-notify/
 ├── Sources/
-│   ├── BatteryNotifyApp.swift   App entry, menu bar icon, launch at login, notification setup
+│   ├── BatteryNotifierApp.swift   App entry, menu bar icon, launch at login, notification setup
 │   ├── BatteryMonitor.swift     Reads the battery and decides when to warn
 │   ├── Notifier.swift           Shows notifications/alerts and plays sounds
 │   ├── PanelView.swift          The menu bar panel: status, health and a settings summary
@@ -104,13 +104,13 @@ battery-notify/
 
 A `.app` is a folder with a fixed layout. Without Xcode, the script builds it by hand:
 
-1. Compiles `Sources/*.swift` with `swiftc` once per architecture, then merges them with `lipo` into a universal `Battery Notify.app/Contents/MacOS/BatteryNotify`
+1. Compiles `Sources/*.swift` with `swiftc` once per architecture, then merges them with `lipo` into a universal `Battery Notifier.app/Contents/MacOS/BatteryNotifier`
 2. Draws the icon with `make-icon.swift`, then converts it to `AppIcon.icns` with `iconutil`
 3. Copies `Info.plist` into the bundle
 4. Signs the app with an ad-hoc signature and **hardened runtime** (`codesign --options runtime --sign -`). macOS requires a signature before an app can send notifications or launch at login.
 5. With `--install`, it:
    - quits any running copy, and force-quits it after 5 seconds
-   - replaces `/Applications/Battery Notify.app`
+   - replaces `/Applications/Battery Notifier.app`
    - launches the new copy, retrying up to 5 times in case macOS hasn't registered it yet (error -600)
 
 ## Where the app keeps things
@@ -118,16 +118,16 @@ A `.app` is a folder with a fixed layout. Without Xcode, the script builds it by
 | Location | What it is |
 |---|---|
 | `~/workspace/battery-notify/` | Source code. The app doesn't need it to run |
-| `/Applications/Battery Notify.app` | The installed app |
+| `/Applications/Battery Notifier.app` | The installed app |
 | `~/Library/Preferences/local.batterynotify.plist` | Saved settings |
 | System Settings → General → Login Items | Launch-at-login entry |
-| System Settings → Notifications → Battery Notify | Notification permission |
+| System Settings → Notifications → Battery Notifier | Notification permission |
 
 ## Uninstall
 
 1. Click the fuel pump icon and choose **Quit**
-2. Remove **Battery Notify** in System Settings → General → Login Items
-3. Delete `/Applications/Battery Notify.app`
+2. Remove **Battery Notifier** in System Settings → General → Login Items
+3. Delete `/Applications/Battery Notifier.app`
 4. Delete settings: `rm ~/Library/Preferences/local.batterynotify.plist`
 
 ## Security
@@ -152,7 +152,7 @@ Known limits:
 ## Troubleshooting
 
 **No notification appears**
-Allow notifications for Battery Notify in System Settings → Notifications. Use the panel's **Test** button to check.
+Allow notifications for Battery Notifier in System Settings → Notifications. Use the panel's **Test** button to check.
 
 **Nothing appears while Focus / Do Not Disturb is on**
 Expected, and not fixable on an ad-hoc build. Breaking through Focus needs the time-sensitive entitlement, which requires a paid Developer ID (see Known limits). Switch **Style** to **Alert**: an `NSAlert` doesn't go through the notification system, so Focus can't suppress it. The warning sound still plays either way, since it's played directly with `afplay`.

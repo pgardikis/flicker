@@ -7,8 +7,8 @@ A macOS 14+ menu bar app (SwiftUI `MenuBarExtra`, no Dock icon via `LSUIElement`
 ## Commands
 
 ```bash
-./build.sh            # build universal app → build/Battery Notify.app
-./build.sh --install  # build, quit running copy, replace /Applications/Battery Notify.app, relaunch
+./build.sh            # build universal app → build/Battery Notifier.app
+./build.sh --install  # build, quit running copy, replace /Applications/Battery Notifier.app, relaunch
 ```
 
 - The compiler runs in **Swift 6 language mode** (`-swift-version 6`) with `-parse-as-library`, once per arch (arm64, x86_64), then merged with `lipo`. Strict concurrency errors will fail the build.
@@ -17,7 +17,7 @@ A macOS 14+ menu bar app (SwiftUI `MenuBarExtra`, no Dock icon via `LSUIElement`
 
 ## Architecture
 
-- `BatteryNotifyApp.swift`: `@main` app plus `AppDelegate`. The delegate enforces a single instance, registers defaults, requests notification permission, turns on launch at login the first time (`SMAppService`, guarded by `didSetupLoginItem`), and starts the monitor.
+- `BatteryNotifierApp.swift`: `@main` app plus `AppDelegate`. The delegate enforces a single instance, registers defaults, requests notification permission, turns on launch at login the first time (`SMAppService`, guarded by `didSetupLoginItem`), and starts the monitor.
 - `BatteryMonitor` (`@MainActor` singleton, `ObservableObject`): reads the internal battery through IOKit (`IOPSCopyPowerSourcesInfo`) and holds all the warning logic. Updates arrive from an `IOPSNotificationCreateRunLoopSource` callback plus a 60 s `Timer`. Both are added in **common run loop modes** so they keep firing while a modal `NSAlert` or the menu is open. The C callback gets back to the instance with `Unmanaged` and `MainActor.assumeIsolated`. The health rating, maximum capacity and cycle count (`BatteryDetails`) come from `system_profiler SPPowerDataType -json` on a detached task, read at launch and when the panel opens. Don't switch them to IOKit: its mAh figures and its health rating don't match System Settings. Missing time estimates (IOKit reports -1 for about two minutes after a power change) fall back to `AppleSmartBattery`'s `TimeRemaining` (65535 means none), re-read every 10 s until one exists. The JSON's `Good` is shown as "Normal", as System Settings does. Only the rating is colored (green Normal, red otherwise), never the capacity, so nothing can contradict macOS; light mode uses a darker green, since system green is too pale for small text there.
 - Warning logic in `evaluate()`: warn only when on battery and below threshold. `lastWarned` stores the percentage at the last warning. A reminder fires after each further `remindEvery` drop (`0` means warn once). Dropping below the critical level always warns, whatever the reminder state. While muted (`mutedUntil`, `.distantFuture` meaning until plugged in), non-critical warnings return before `lastWarned` is set, so the held-back warning fires when `unmute()` re-evaluates. Plugging in ends a mute, and the mute is in memory only. `Settings.critical` reads as 0 unless it's below the threshold, and `SettingsView` clamps it when the threshold moves. Charging or going back above the threshold resets `lastWarned` to nil. If no battery is found, every published field is cleared. `statusText` only says "Not charging" once that has lasted `notChargingDelay`, because IOKit reports adapter-connected-but-not-charging for a moment on every plug and unplug.
 - `Notifier`: plays the sound itself through `/usr/bin/afplay`, so volume follows the output volume and can be boosted. It then shows either an `NSAlert` (guarded by `alertShowing`, since `runModal` blocks; always used for critical warnings, since Focus can't hide it) or a `UNUserNotification` with the fixed identifier `low-battery`, so each reminder replaces the last banner. If notification permission is missing, it falls back to `osascript`.

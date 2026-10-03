@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
   <key>CFBundleIdentifier</key><string>local.batterynotify</string>
-  <key>CFBundleName</key><string>Battery Notify</string>
-  <key>CFBundleDisplayName</key><string>Battery Notify</string>
-  <key>CFBundleExecutable</key><string>BatteryNotify</string>
+  <key>CFBundleName</key><string>Battery Notifier</string>
+  <key>CFBundleDisplayName</key><string>Battery Notifier</string>
+  <key>CFBundleExecutable</key><string>BatteryNotifier</string>
   <key>CFBundleIconFile</key><string>AppIcon</string>
   <key>CFBundlePackageType</key><string>APPL</string>
   <key>CFBundleShortVersionString</key><string>1.0</string>
