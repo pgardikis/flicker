@@ -13,6 +13,7 @@ It lives in the menu bar as a ⛽ fuel pump icon, checks the battery level in th
 - **Launch at login**
 - **Live battery status**: percentage, charging state and time remaining in the panel
 - **Battery health**: shows the health rating, maximum capacity and cycle count as System Settings reports them. The rating is green when Normal and red otherwise. Maximum capacity is green from 80%, orange from 60% and red below that, since Apple designs batteries to keep about 80% at their rated cycle count
+- **Percentage in the menu bar**: optional, next to the fuel pump icon
 - **Send Test Warning** button to check your settings
 
 The fuel pump becomes filled with a "!" while the battery is below your threshold.
@@ -51,6 +52,7 @@ Click the fuel pump icon in the menu bar to open the panel. Changes save instant
 | Style | Notification | `Notification` shows a banner. `Alert` shows a dialog until dismissed |
 | Sound | Sosumi | Any sound from `/System/Library/Sounds`, or None |
 | Volume | 3.0× | 0.5–4×. Relative to your speaker volume |
+| Show percentage in menu bar | On | Shows the battery level next to the fuel pump |
 | Launch at login | On | Starts the app when you log in |
 
 ### When it warns

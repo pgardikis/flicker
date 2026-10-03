@@ -6,12 +6,18 @@ import UserNotifications
 struct BatteryNotifyApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @StateObject private var monitor = BatteryMonitor.shared
+    @AppStorage(Settings.showPercentKey) private var showPercent = Settings.defaultShowPercent
 
     var body: some Scene {
         MenuBarExtra {
             SettingsView().environmentObject(monitor)
         } label: {
-            Image(systemName: monitor.isLow ? "fuelpump.exclamationmark.fill" : "fuelpump")
+            HStack {
+                Image(systemName: monitor.isLow ? "fuelpump.exclamationmark.fill" : "fuelpump")
+                if showPercent, let percent = monitor.percent {
+                    Text("\(percent)%")
+                }
+            }
         }
         .menuBarExtraStyle(.window)
     }

@@ -9,6 +9,7 @@ struct SettingsView: View {
     @AppStorage(Settings.styleKey) private var style = Settings.defaultStyle
     @AppStorage(Settings.soundKey) private var sound = Settings.defaultSound
     @AppStorage(Settings.volumeKey) private var volume = Settings.defaultVolume
+    @AppStorage(Settings.showPercentKey) private var showPercent = Settings.defaultShowPercent
 
     @State private var launchAtLogin = SMAppService.mainApp.status == .enabled
     @State private var loginError: String?
@@ -73,6 +74,8 @@ struct SettingsView: View {
                 Slider(value: $volume, in: 0.5...4, step: 0.5)
             }
             .disabled(sound.isEmpty)
+
+            Toggle("Show percentage in menu bar", isOn: $showPercent)
 
             // An explicit binding, so re-reading the status in onAppear can't re-trigger a write
             Toggle("Launch at login", isOn: Binding(get: { launchAtLogin }, set: { setLaunchAtLogin($0) }))

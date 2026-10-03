@@ -7,6 +7,7 @@ enum Settings {
     static let styleKey = "style"
     static let soundKey = "sound"
     static let volumeKey = "volume"
+    static let showPercentKey = "showPercent"
     static let didSetupLoginItemKey = "didSetupLoginItem"
 
     static let defaultThreshold = 40
@@ -14,6 +15,7 @@ enum Settings {
     static let defaultStyle = "notification"
     static let defaultSound = "Sosumi"
     static let defaultVolume = 3.0
+    static let defaultShowPercent = true
 
     static func registerDefaults() {
         UserDefaults.standard.register(defaults: [
@@ -22,6 +24,7 @@ enum Settings {
             styleKey: defaultStyle,
             soundKey: defaultSound,
             volumeKey: defaultVolume,
+            showPercentKey: defaultShowPercent,
         ])
     }
 
