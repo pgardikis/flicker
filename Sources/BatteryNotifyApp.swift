@@ -13,7 +13,8 @@ struct BatteryNotifyApp: App {
             SettingsView().environmentObject(monitor)
         } label: {
             HStack {
-                Image(systemName: monitor.isLow ? "fuelpump.exclamationmark.fill" : "fuelpump")
+                Image(systemName: monitor.isMuted ? "fuelpump.slash"
+                    : monitor.isLow ? "fuelpump.exclamationmark.fill" : "fuelpump")
                 if showPercent, let percent = monitor.percent {
                     Text("\(percent)%")
                 }

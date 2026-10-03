@@ -10,10 +10,21 @@ final class BatteryMonitor: ObservableObject {
     @Published private(set) var onBattery = false
     @Published private(set) var minutesRemaining: Int?
     @Published private(set) var details: BatteryDetails?
+    /// When muted warnings resume; `.distantFuture` means when the charger is connected.
+    @Published private(set) var mutedUntil: Date?
 
     /// Percentage at the last warning; nil once charging or back above the threshold.
     private var lastWarned: Int?
     private var timer: Timer?
+    private var muteTimer: Timer?
+
+    var isMuted: Bool { mutedUntil != nil }
+
+    var mutedText: String? {
+        guard let mutedUntil else { return nil }
+        if mutedUntil == .distantFuture { return "Warnings muted until plugged in" }
+        return "Warnings muted until \(mutedUntil.formatted(date: .omitted, time: .shortened))"
+    }
 
     var isLow: Bool {
         guard let percent else { return false }
@@ -91,6 +102,32 @@ final class BatteryMonitor: ObservableObject {
         }
     }
 
+    /// Mutes warnings below the critical level, for `duration` or, when nil, until the charger is
+    /// connected. Plugging in ends any mute.
+    func mute(for duration: TimeInterval?) {
+        muteTimer?.invalidate()
+        muteTimer = nil
+        guard let duration else {
+            mutedUntil = .distantFuture
+            return
+        }
+        mutedUntil = Date().addingTimeInterval(duration)
+        // Fire on time rather than waiting for the next poll, so a warning due meanwhile isn't late
+        let timer = Timer(timeInterval: duration, repeats: false) { _ in
+            MainActor.assumeIsolated { BatteryMonitor.shared.unmute() }
+        }
+        RunLoop.main.add(timer, forMode: .common)
+        muteTimer = timer
+    }
+
+    /// Re-evaluates straight away, so a warning held back by the mute arrives now.
+    func unmute() {
+        muteTimer?.invalidate()
+        muteTimer = nil
+        mutedUntil = nil
+        refresh()
+    }
+
     func sendTest(critical: Bool = false) {
         readBattery()
         Notifier.warn(percent: percent ?? 0, threshold: Settings.threshold,
@@ -98,6 +135,15 @@ final class BatteryMonitor: ObservableObject {
     }
 
     private func readBattery() {
+        let wasOnBattery = onBattery
+        defer {
+            if wasOnBattery && !onBattery && isMuted {
+                muteTimer?.invalidate()
+                muteTimer = nil
+                mutedUntil = nil
+            }
+        }
+
         let info = IOPSCopyPowerSourcesInfo().takeRetainedValue()
         let sources = IOPSCopyPowerSourcesList(info).takeRetainedValue() as [CFTypeRef]
 
@@ -160,6 +206,10 @@ final class BatteryMonitor: ObservableObject {
             let remindEvery = Settings.remindEvery
             if !enteredCritical && (remindEvery <= 0 || percent > lastWarned - remindEvery) { return }
         }
+
+        // The critical level gets through a mute: that's where a missed warning costs unsaved
+        // work. Returning before lastWarned is set means the held-back warning fires on unmute.
+        if isMuted && !isCritical { return }
 
         lastWarned = percent
         Notifier.warn(percent: percent, threshold: threshold, critical: isCritical ? critical : nil,

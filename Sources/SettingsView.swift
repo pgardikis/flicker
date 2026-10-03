@@ -18,6 +18,16 @@ struct SettingsView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             header
+            if let mutedText = monitor.mutedText {
+                HStack {
+                    Label(mutedText, systemImage: "bell.slash.fill")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    Button("Unmute") { monitor.unmute() }
+                        .controlSize(.small)
+                }
+            }
             if monitor.percent != nil, let healthText = monitor.healthText {
                 Label {
                     VStack(alignment: .leading, spacing: 2) {
@@ -138,7 +148,24 @@ struct SettingsView: View {
             VStack(alignment: .leading) {
                 Text(monitor.percent.map { "\($0)%" } ?? "—").font(.title2.bold())
                 Text(monitor.statusText).font(.caption).foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
+            Spacer(minLength: 0)
+            // Up here rather than in the bottom row, which has no room left beside Quit. Icon only,
+            // so the status text beside it isn't truncated
+            Menu {
+                Button("For 30 Minutes") { monitor.mute(for: 30 * 60) }
+                Button("For 1 Hour") { monitor.mute(for: 60 * 60) }
+                Button("Until Plugged In") { monitor.mute(for: nil) }
+                    .disabled(!monitor.onBattery)
+            } label: {
+                Label("Mute", systemImage: monitor.isMuted ? "bell.slash.fill" : "bell.slash")
+                    .labelStyle(.iconOnly)
+            }
+            .menuStyle(.borderlessButton)
+            .menuIndicator(.hidden)
+            .fixedSize()
+            .help("Mute warnings")
         }
     }
 
