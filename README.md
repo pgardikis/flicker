@@ -1,10 +1,8 @@
 # Battery Notifier
 
-A lightweight macOS menu bar app that warns you, with a notification or an alert and a sound, when your MacBook's battery runs low.
+A lightweight macOS menu bar app that warns you when your MacBook's battery runs low.
 
 macOS only warns once, at a level it picks. Battery Notifier warns at the level you choose, reminds you as the battery keeps dropping, plays a sound loud enough to notice, and can show alerts that get through Focus.
-
-## Screenshots
 
 | Light | Dark |
 |---|---|
@@ -39,20 +37,20 @@ The app isn't notarized, so build it on each Mac you want to use it on. Run `./b
 
 ## Usage
 
-Click the fuel pump to open the panel. It shows the battery, its health and a summary of your warnings. **Test** sends a test warning, and the bell mutes warnings. **Settings…** opens the Settings window, where changes apply straight away.
+Click the ⛽ fuel pump icon in the menu bar to open the panel. It shows the battery, its health and a summary of your warnings. **Test** sends a test warning, and the bell mutes warnings. **Settings…** opens the Settings window, where changes apply straight away.
 
 | Setting | Default | Options | What it does |
 |---|---|---|---|
 | Warn below | 40% | 5–95% | Warns when on battery and below this level |
 | Critical level | 10% | Off, 5, 10, 15, 20% | Below this, always warns with an alert |
-| Remind again every | 5% drop | Never, 1, 2, 5, 10% | Warns again after each further drop |
+| Remind again every | 5% drop | Never, 1, 2, 5, 10% drop | Warns again after each further drop (Never warns once) |
 | Style | Notification | Notification, Alert | A banner, or a dialog that stays until you click OK |
 | Sound | Sosumi | Any system sound, None | Played with every warning |
-| Volume | 300% | 50–400% | Relative to your speaker volume (see below) |
+| Volume | 300% | 50–400% | How loud the sound plays (see below) |
 | Show percentage in menu bar | On | On, Off | Shows the level next to the fuel pump |
 | Launch at login | On | On, Off | Starts the app when you log in |
 
-The critical level always stays below *Warn below*: Settings only offers lower values, and moves it down if you drag *Warn below* under it.
+The critical level always stays below *Warn below*: Settings only offers lower values, and moves it down if you drag *Warn below* under it, or turns it off if nothing lower is left.
 
 Volume is relative to your speaker volume: 100% plays the sound at that volume, and higher values amplify the sound itself. Your Mac's volume setting is never changed, and if your Mac is muted, the warning sound is silent too.
 
