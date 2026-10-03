@@ -1,7 +1,5 @@
 # AGENTS.md
 
-This file provides guidance to AI coding agents working with code in this repository.
-
 ## Overview
 
 A macOS 14+ menu bar app (SwiftUI `MenuBarExtra`, no Dock icon via `LSUIElement`) that warns when the battery drops below a user-set threshold. There is no Xcode project or Swift package: the `.app` bundle is assembled by hand in `build.sh` using only the Command Line Tools.
@@ -31,3 +29,9 @@ A macOS 14+ menu bar app (SwiftUI `MenuBarExtra`, no Dock icon via `LSUIElement`
 - **Security hardening**: `playSound` only plays names listed in `Notifier.availableSounds` (from `/System/Library/Sounds`). The `osascript` fallback passes the title and message as `argv` and never interpolates them into the script text. Keep both.
 - The app has no network access, no sandbox and no privileges. Keep it that way.
 - `README.md` documents the settings, behavior and build steps in detail. Update it when behavior changes.
+
+## Commit messages
+
+- Subject: [Conventional Commits](https://www.conventionalcommits.org) style, `<type>: <description>`. The description is a lowercase imperative sentence with no trailing period, such as `feat: show the battery health rating in the panel`.
+- Types: `feat` (new behavior), `fix` (bug fix), `docs` (README, AGENTS.md, comments), `refactor` (no behavior change), `perf`, `build` (`build.sh`, `Info.plist`, compiler flags, icon), `chore` (anything else).
+- Add a body whenever the change isn't self-explanatory from the subject. Leave a blank line after the subject and wrap at about 72 columns. Explain what was wrong or missing and why this fix was chosen, including side effects or alternatives ruled out. Don't restate the diff. Older commits predate the type prefix but show the kind of body to write.
