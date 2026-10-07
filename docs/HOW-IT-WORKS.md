@@ -70,7 +70,7 @@ A `.app` is a folder with a fixed layout. Without Xcode, the script builds it by
 
 ## Screenshots
 
-`docs/images/update-screenshots.sh` re-renders the panel images straight from `PanelView` at 3x and rebuilds `screenshots.png` with `compose.swift`, which enlarges the panel to the Settings window's width. It also draws the menu bar icon's states from `MenuBarLabel`, enlarged the same way. The Settings window images are real captures, since a window drawn by a background process renders its controls as inactive.
+`docs/images/update-screenshots.sh` re-renders the panel images straight from `PanelView` at 4x, drawn on the sharpest connected screen since a window renders at its screen's pixel density, and rebuilds `screenshots.png` with `compose.swift`, which enlarges the panel to the Settings window's width. It also draws the menu bar icon's states from `MenuBarLabel`, enlarged the same way. The Settings window images are real Retina (2x) captures, with the window shadow, since a window drawn by a background process renders its controls as inactive.
 
 ## Where the app keeps things
 

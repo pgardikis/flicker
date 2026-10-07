@@ -1,6 +1,6 @@
-// Renders the menu bar panel to panel-light.png and panel-dark.png at 3x, straight from the app's
-// own PanelView, and the menu bar icon's states to menubar-light.png and menubar-dark.png at 4x from
-// MenuBarLabel. Built and run by update-screenshots.sh; the panel shows the battery as it is right
+// Renders the menu bar panel to panel-light.png and panel-dark.png, straight from the app's own
+// PanelView, and the menu bar icon's states to menubar-light.png and menubar-dark.png from
+// MenuBarLabel, both at 4x. Built and run by update-screenshots.sh; the panel shows the battery as it is right
 // now, with default settings.
 import AppKit
 import SwiftUI
@@ -37,19 +37,26 @@ enum RenderPanel {
                 .environmentObject(BatteryMonitor.shared)
             render(panel, dark: dark, to: "\(outputDirectory)/panel-\(dark ? "dark" : "light").png")
         }
-        // Small, so compose.swift enlarges it to the Settings window's width; hence 4x
+        // Small, so compose.swift enlarges it to the Settings window's width
         for dark in [false, true] {
-            render(MenuBarStates(dark: dark), dark: dark, scale: 4,
+            render(MenuBarStates(dark: dark), dark: dark,
                    to: "\(outputDirectory)/menubar-\(dark ? "dark" : "light").png")
         }
     }
 
     @MainActor
-    static func render<V: View>(_ view: V, dark: Bool, scale: Int = 3, to path: String) {
-        let hosting = NSHostingView(rootView: view)
+    static func render<V: View>(_ view: V, dark: Bool, scale: Int = 4, to path: String) {
+        // A window draws at its screen's pixel density, so it goes on the sharpest screen, and the
+        // view is enlarged inside it to make up the rest of `scale`
+        let screen = NSScreen.screens.max { $0.backingScaleFactor < $1.backingScaleFactor }!
+        let zoom = CGFloat(scale) / screen.backingScaleFactor
+        let pointSize = NSHostingView(rootView: view).fittingSize
+        let hosting = NSHostingView(rootView: view
+            .scaleEffect(zoom, anchor: .topLeading)
+            .frame(width: pointSize.width * zoom, height: pointSize.height * zoom, alignment: .topLeading))
         let size = hosting.fittingSize
-        let window = ActiveWindow(contentRect: CGRect(origin: .zero, size: size), styleMask: [.borderless],
-                                  backing: .buffered, defer: false)
+        let window = ActiveWindow(contentRect: CGRect(origin: screen.frame.origin, size: size), styleMask: [.borderless],
+                                  backing: .buffered, defer: false, screen: screen)
         window.appearance = NSAppearance(named: dark ? .darkAqua : .aqua)
         window.isOpaque = false
         window.backgroundColor = .clear
@@ -59,11 +66,7 @@ enum RenderPanel {
         RunLoop.main.run(until: Date().addingTimeInterval(0.5))
 
         let bounds = hosting.bounds
-        let rep = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: Int(bounds.width) * scale,
-                                   pixelsHigh: Int(bounds.height) * scale, bitsPerSample: 8, samplesPerPixel: 4,
-                                   hasAlpha: true, isPlanar: false, colorSpaceName: .deviceRGB,
-                                   bytesPerRow: 0, bitsPerPixel: 0)!
-        rep.size = bounds.size
+        guard let rep = hosting.bitmapImageRepForCachingDisplay(in: bounds) else { fatalError("can't render \(path)") }
         hosting.cacheDisplay(in: bounds, to: rep)
         try! rep.representation(using: .png, properties: [:])!.write(to: URL(fileURLWithPath: path))
         window.orderOut(nil)
