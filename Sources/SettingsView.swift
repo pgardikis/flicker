@@ -130,7 +130,7 @@ struct SettingsView: View {
                 .help("Sends a warning with the current style and sound")
             }
 
-            Section("General") {
+            Section {
                 Toggle("Show in Dock", isOn: $showInDock)
                     .onChange(of: showInDock) { _, visible in
                         DockIcon.show(visible)
@@ -145,6 +145,13 @@ struct SettingsView: View {
                 if let loginError {
                     Text(loginError).font(.caption).foregroundStyle(.red)
                 }
+            } header: {
+                Text("General")
+            } footer: {
+                Text("Flicker \(Self.version)")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity)
             }
         }
         .formStyle(.grouped)
@@ -155,6 +162,9 @@ struct SettingsView: View {
             launchAtLogin = SMAppService.mainApp.status == .enabled
         }
     }
+
+    /// The version from Info.plist, so it always matches the build.
+    private static let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "?"
 
     /// What a critical warning plays, with "Same as Sound" resolved.
     private var resolvedCriticalSound: String { criticalSound == Settings.sameSound ? sound : criticalSound }

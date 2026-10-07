@@ -25,6 +25,10 @@ A macOS 14+ menu bar app (SwiftUI `MenuBarExtra`, no Dock icon by default via `L
 - `SettingsView` is the window of a SwiftUI `Settings` scene, written `SwiftUI.Settings` because our `Settings` enum shadows it. The panel's Settings… button activates the app first (a menu bar app's window otherwise opens behind others), calls `openSettings`, and closes the panel. It keeps the window's saved position when that's on the clicked menu bar's screen, and otherwise centers it there. Settings apply immediately, with no Done button, as Apple's guidelines expect.
 - `Settings`: the `UserDefaults` keys and defaults. `SettingsView` binds to the same keys with `@AppStorage`, and the monitor reads them through `Settings.*`. Add any new setting in both places. `SettingsView` calls `monitor.refresh()` when a warning setting changes (the threshold slider only on release), and the 60 s timer catches anything else, such as `defaults write`.
 
+## Versions
+
+- The version is `CFBundleShortVersionString` in `Info.plist` (with `CFBundleVersion` as the build number), shown at the bottom of Settings. Each version has an annotated git tag `vX.Y` on the commit that sets it; there are no GitHub Releases or binaries.
+
 ## Constraints to preserve
 
 - **Ad-hoc signing with hardened runtime** (`codesign --options runtime --sign -`) is required for notifications and launch at login. Do **not** add entitlements such as `com.apple.developer.usernotifications.time-sensitive`. They need a provisioning profile from a paid Apple Developer Program membership, and in an ad-hoc signature they make AMFI refuse to launch the app (POSIX 163). `interruptionLevel = .timeSensitive` is deliberately left in the code even though it has no effect on this build.

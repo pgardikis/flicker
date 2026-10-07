@@ -6,7 +6,7 @@ macOS only warns when the battery is nearly empty, at a level you can't change, 
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/images/screenshots-dark.png">
-  <img src="docs/images/screenshots-light.png" alt="Flicker's menu bar icon (normal, low battery with an exclamation mark, muted crossed out), the menu bar panel (44% and charging, 1:44 until full, battery health Normal, maximum capacity 80%, 1,061 cycles, a summary of the warning settings, and Settings and Quit buttons) and the Settings window (Warnings: warn below 40%, critical level 10%, remind every 5% drop; Alert: notification style, Sosumi sound, critical sound same as Sound, 300% volume, test warning; General: show in Dock, percentage in menu bar, launch at login), each with its other appearance behind it">
+  <img src="docs/images/screenshots-light.png" alt="Flicker's menu bar icon (normal, low battery with an exclamation mark, muted crossed out), the menu bar panel (80% on battery with 3:05 remaining, battery health Normal, maximum capacity 80%, 1,061 cycles, a summary of the warning settings, and Settings and Quit buttons) and the Settings window (Warnings: warn below 40%, critical level 10%, remind every 5% drop; Alert: notification style, Sosumi sound, critical sound same as Sound, 300% volume, test warning; General: show in Dock, percentage in menu bar, launch at login; version 1.0 at the bottom), each with its other appearance behind it">
 </picture>
 
 ## Features
