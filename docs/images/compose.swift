@@ -1,6 +1,6 @@
-// Combines the screenshots into screenshots.png for the README: Light and Dark across the top,
-// Menu bar icon, Menu bar panel and Settings window down the side. Run by update-screenshots.sh from the
-// repo root.
+// Combines the screenshots into screenshots.png for the README: Light and Dark across the top, and
+// the menu bar icon, the menu bar panel and the Settings window down each column. Run by
+// update-screenshots.sh from the repo root.
 import AppKit
 
 let dir = "docs/images"
@@ -25,20 +25,27 @@ func fit(_ image: NSImage, width: CGFloat) -> NSImage {
     return image
 }
 
-// The panel and the menu bar strip are narrower than the Settings window, so they're enlarged to
-// the same width; that's why they're rendered at 4x, so they're only ever scaled down.
-let settingsWidth = load("settings-light").size.width
-let rows: [(label: String, light: NSImage, dark: NSImage)] = [
-    ("Menu bar icon", fit(load("menubar-light"), width: settingsWidth), fit(load("menubar-dark"), width: settingsWidth)),
-    ("Menu bar panel", fit(load("panel-light"), width: settingsWidth), fit(load("panel-dark"), width: settingsWidth)),
-    ("Settings window", load("settings-light"), load("settings-dark")),
+// Each image has a transparent margin for its shadow. Items are sized and placed by what's inside
+// it, so the panel and the menu bar strip match the Settings window's width (rendered at 4x, they're
+// only ever scaled down), and the shadows spill into the gaps instead of widening the image.
+// Margins in points at the image's own size: sides, top, bottom. The menu bar strip has room for
+// its captions below; a window's shadow falls lower than it reaches above.
+let shadowMargin: [String: (side: CGFloat, top: CGFloat, bottom: CGFloat)] = [
+    "menubar": (240 * 24 / 300, 4, 18), "panel": (24, 20, 28), "settings": (56, 37.5, 74.5),
 ]
+let windowWidth = load("settings-light").size.width - 2 * shadowMargin["settings"]!.side
+func item(_ name: String) -> (image: NSImage, side: CGFloat, top: CGFloat, bottom: CGFloat) {
+    let image = load(name), margin = shadowMargin[String(name.prefix { $0 != "-" })]!
+    let zoom = windowWidth / (image.size.width - 2 * margin.side)
+    return (fit(image, width: image.size.width * zoom), margin.side * zoom, margin.top * zoom, margin.bottom * zoom)
+}
+let rows = ["menubar", "panel", "settings"].map { (light: item("\($0)-light"), dark: item("\($0)-dark")) }
 
 // Layout, in points
-let margin: CGFloat = 48, labelWidth: CGFloat = 200, columnGap: CGFloat = 24, rowGap: CGFloat = 8, headerHeight: CGFloat = 72
-let columnWidth = rows.flatMap { [$0.light.size.width, $0.dark.size.width] }.max()!
-let rowHeights = rows.map { max($0.light.size.height, $0.dark.size.height) }
-let size = CGSize(width: margin * 2 + labelWidth + columnWidth * 2 + columnGap,
+let margin: CGFloat = 48, columnGap: CGFloat = 48, rowGap: CGFloat = 40, headerHeight: CGFloat = 64
+// A row is as tall as its content, without the margins above and below
+let rowHeights = rows.map { $0.light.image.size.height - $0.light.top - $0.light.bottom }
+let size = CGSize(width: margin * 2 + windowWidth * 2 + columnGap,
                   height: margin * 2 + headerHeight + rowHeights.reduce(0, +) + rowGap * CGFloat(rows.count - 1))
 
 let rep = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: Int(size.width * scale), pixelsHigh: Int(size.height * scale),
@@ -64,21 +71,18 @@ func draw(_ text: String, size: CGFloat, weight: NSFont.Weight, color: NSColor, 
 }
 
 let ink = NSColor(srgbRed: 0.11, green: 0.114, blue: 0.13, alpha: 1)
-let columnX = [margin + labelWidth, margin + labelWidth + columnWidth + columnGap]
+let columnX = [margin, margin + windowWidth + columnGap]
 
 // Header: Light and Dark over their columns (AppKit's origin is bottom-left)
 var top = size.height - margin
 for (x, title) in zip(columnX, ["Light", "Dark"]) {
-    draw(title, size: 40, weight: .bold, color: ink, in: CGRect(x: x, y: top - headerHeight, width: columnWidth, height: headerHeight), centered: true)
+    draw(title, size: 32, weight: .bold, color: ink, in: CGRect(x: x, y: top - headerHeight, width: windowWidth, height: headerHeight), centered: true)
 }
 top -= headerHeight
 
 for (row, height) in zip(rows, rowHeights) {
-    let box = CGRect(x: margin, y: top - height, width: labelWidth, height: height)
-    draw(row.label, size: 24, weight: .semibold, color: ink, in: box, centered: false)
-    for (x, image) in zip(columnX, [row.light, row.dark]) {
-        let origin = CGPoint(x: x + (columnWidth - image.size.width) / 2, y: top - height + (height - image.size.height) / 2)
-        image.draw(in: CGRect(origin: origin, size: image.size))
+    for (x, item) in zip(columnX, [row.light, row.dark]) {
+        item.image.draw(in: CGRect(origin: CGPoint(x: x - item.side, y: top - height - item.bottom), size: item.image.size))
     }
     top -= height + rowGap
 }
