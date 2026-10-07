@@ -74,8 +74,8 @@ enum RenderPanel {
     }
 }
 
-/// A menu bar showing the icon in each state, captioned underneath. The captions use the same ink
-/// as screenshots.png's labels, since the composite's card is light in both columns.
+/// A menu bar showing the icon in each state, captioned underneath. compose.swift draws only the
+/// strip and redraws the captions in its card's ink.
 struct MenuBarStates: View {
     let dark: Bool
     private let states: [(caption: String, isLow: Bool, isMuted: Bool)] = [

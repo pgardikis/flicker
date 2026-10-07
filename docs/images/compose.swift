@@ -1,6 +1,7 @@
-// Combines the screenshots into screenshots.png for the README: Light and Dark across the top, and
-// the menu bar icon, the menu bar panel and the Settings window down each column. Run by
-// update-screenshots.sh from the repo root.
+// Combines the screenshots into screenshots-light.png and screenshots-dark.png for the README, which
+// shows the one matching the visitor's GitHub theme. Each has the menu bar icon, the menu bar panel
+// and the Settings window down one column, labelled, in that appearance, with the other appearance
+// peeking out behind like a stacked card. Run by update-screenshots.sh from the repo root.
 import AppKit
 
 let dir = "docs/images"
@@ -28,8 +29,8 @@ func fit(_ image: NSImage, width: CGFloat) -> NSImage {
 // Each image has a transparent margin for its shadow. Items are sized and placed by what's inside
 // it, so the panel and the menu bar strip match the Settings window's width (rendered at 4x, they're
 // only ever scaled down), and the shadows spill into the gaps instead of widening the image.
-// Margins in points at the image's own size: sides, top, bottom. The menu bar strip has room for
-// its captions below; a window's shadow falls lower than it reaches above.
+// Margins are in points at the image's own size. The menu bar strip has room for its captions below;
+// a window's shadow falls lower than it reaches above.
 let shadowMargin: [String: (side: CGFloat, top: CGFloat, bottom: CGFloat)] = [
     "menubar": (240 * 24 / 300, 4, 18), "panel": (24, 20, 28), "settings": (56, 37.5, 74.5),
 ]
@@ -39,26 +40,6 @@ func item(_ name: String) -> (image: NSImage, side: CGFloat, top: CGFloat, botto
     let zoom = windowWidth / (image.size.width - 2 * margin.side)
     return (fit(image, width: image.size.width * zoom), margin.side * zoom, margin.top * zoom, margin.bottom * zoom)
 }
-let rows = ["menubar", "panel", "settings"].map { (light: item("\($0)-light"), dark: item("\($0)-dark")) }
-
-// Layout, in points
-let margin: CGFloat = 48, columnGap: CGFloat = 48, rowGap: CGFloat = 40, headerHeight: CGFloat = 64
-// A row is as tall as its content, without the margins above and below
-let rowHeights = rows.map { $0.light.image.size.height - $0.light.top - $0.light.bottom }
-let size = CGSize(width: margin * 2 + windowWidth * 2 + columnGap,
-                  height: margin * 2 + headerHeight + rowHeights.reduce(0, +) + rowGap * CGFloat(rows.count - 1))
-
-let rep = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: Int(size.width * scale), pixelsHigh: Int(size.height * scale),
-                           bitsPerSample: 8, samplesPerPixel: 4, hasAlpha: true, isPlanar: false,
-                           colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0)!
-rep.size = size
-NSGraphicsContext.saveGraphicsState()
-NSGraphicsContext.current = NSGraphicsContext(bitmapImageRep: rep)
-NSGraphicsContext.current?.imageInterpolation = .high
-
-// A soft neutral card, so the dark labels read on both GitHub themes
-NSColor(srgbRed: 0.933, green: 0.941, blue: 0.957, alpha: 1).setFill()
-NSBezierPath(roundedRect: CGRect(origin: .zero, size: size), xRadius: 28, yRadius: 28).fill()
 
 func draw(_ text: String, size: CGFloat, weight: NSFont.Weight, color: NSColor, in box: CGRect, centered: Bool) {
     let style = NSMutableParagraphStyle()
@@ -70,23 +51,65 @@ func draw(_ text: String, size: CGFloat, weight: NSFont.Weight, color: NSColor, 
                             withAttributes: attributes)
 }
 
-let ink = NSColor(srgbRed: 0.11, green: 0.114, blue: 0.13, alpha: 1)
-let columnX = [margin, margin + windowWidth + columnGap]
+// Layout, in points
+let margin: CGFloat = 48, rowGap: CGFloat = 48, labelWidth: CGFloat = 170, peek = CGSize(width: 56, height: 40)
+let labels = ["Menu bar icon", "Menu bar panel", "Settings window"]
+for front in ["light", "dark"] {
+    let back = front == "light" ? "dark" : "light"
+    let rows = ["menubar", "panel", "settings"].map { (name: $0, front: item("\($0)-\(front)"), back: item("\($0)-\(back)")) }
+    let rowHeights = rows.map { $0.front.image.size.height - $0.front.top - $0.front.bottom + peek.height }
+    let size = CGSize(width: margin * 2 + labelWidth + windowWidth + peek.width,
+                      height: margin * 2 + rowHeights.reduce(0, +) + rowGap * CGFloat(rows.count - 1))
+    let rep = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: Int(size.width * scale), pixelsHigh: Int(size.height * scale),
+                               bitsPerSample: 8, samplesPerPixel: 4, hasAlpha: true, isPlanar: false,
+                               colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0)!
+    rep.size = size
+    NSGraphicsContext.saveGraphicsState()
+    NSGraphicsContext.current = NSGraphicsContext(bitmapImageRep: rep)
+    NSGraphicsContext.current?.imageInterpolation = .high
+    // A card in the GitHub theme's own tone, with matching ink
+    let dark = front == "dark"
+    (dark ? NSColor(srgbRed: 0.086, green: 0.106, blue: 0.133, alpha: 1) : NSColor(srgbRed: 0.933, green: 0.941, blue: 0.957, alpha: 1)).setFill()
+    NSBezierPath(roundedRect: CGRect(origin: .zero, size: size), xRadius: 28, yRadius: 28).fill()
+    let ink = dark ? NSColor(srgbRed: 0.902, green: 0.929, blue: 0.953, alpha: 1) : NSColor(srgbRed: 0.11, green: 0.114, blue: 0.13, alpha: 1)
 
-// Header: Light and Dark over their columns (AppKit's origin is bottom-left)
-var top = size.height - margin
-for (x, title) in zip(columnX, ["Light", "Dark"]) {
-    draw(title, size: 32, weight: .bold, color: ink, in: CGRect(x: x, y: top - headerHeight, width: windowWidth, height: headerHeight), centered: true)
-}
-top -= headerHeight
-
-for (row, height) in zip(rows, rowHeights) {
-    for (x, item) in zip(columnX, [row.light, row.dark]) {
-        item.image.draw(in: CGRect(origin: CGPoint(x: x - item.side, y: top - height - item.bottom), size: item.image.size))
+    let x0 = margin + labelWidth
+    var top = size.height - margin
+    for (index, (row, height)) in zip(rows, rowHeights).enumerated() {
+        let bottom = top - height
+        let frontFrame = CGRect(origin: CGPoint(x: x0 - row.front.side, y: bottom - row.front.bottom), size: row.front.image.size)
+        let backFrame = CGRect(origin: CGPoint(x: x0 + peek.width - row.back.side, y: bottom + peek.height - row.back.bottom), size: row.back.image.size)
+        // The menu bar strips are drawn without their baked-in captions, which are redrawn here in
+        // the card's ink
+        let stripZoom = row.front.side / (240 * 24 / 300)
+        func strip(_ frame: CGRect) -> CGRect {
+            CGRect(x: frame.minX, y: frame.maxY - (4 + 24 + 2) * stripZoom, width: frame.width, height: (4 + 24 + 2) * stripZoom)
+        }
+        for (image, frame) in [(row.back.image, backFrame), (row.front.image, frontFrame)] {
+            NSGraphicsContext.saveGraphicsState()
+            if row.name == "menubar" { NSBezierPath(rect: strip(frame)).setClip() }
+            image.draw(in: frame)
+            NSGraphicsContext.restoreGraphicsState()
+        }
+        if row.name == "menubar" {
+            let captionTop = strip(frontFrame).minY - 6 * stripZoom
+            for (i, caption) in ["Normal", "Low battery", "Muted"].enumerated() {
+                let box = CGRect(x: x0 + windowWidth * CGFloat(i) / 3, y: captionTop - 20, width: windowWidth / 3, height: 20)
+                draw(caption, size: 17, weight: .medium, color: ink, in: box, centered: true)
+            }
+        }
+        // Each label is centred on its front item; the menu bar's on the whole group: both strips
+        // and the captions
+        let frontTop = bottom + height - peek.height
+        let labelMidY = row.name == "menubar"
+            ? (strip(backFrame).maxY - 4 * stripZoom + strip(frontFrame).minY - 6 * stripZoom - 20) / 2
+            : (frontTop + bottom) / 2
+        draw(labels[index], size: 20, weight: .semibold, color: ink,
+             in: CGRect(x: margin, y: labelMidY - 15, width: labelWidth - 16, height: 30), centered: false)
+        top -= height + rowGap
     }
-    top -= height + rowGap
+    NSGraphicsContext.restoreGraphicsState()
+    let out = "\(dir)/screenshots-\(front).png"
+    try! rep.representation(using: .png, properties: [:])!.write(to: URL(fileURLWithPath: out))
+    print("Wrote \(out), \(rep.pixelsWide) × \(rep.pixelsHigh)")
 }
-
-NSGraphicsContext.restoreGraphicsState()
-try! rep.representation(using: .png, properties: [:])!.write(to: URL(fileURLWithPath: "\(dir)/screenshots.png"))
-print("Wrote \(dir)/screenshots.png, \(rep.pixelsWide) × \(rep.pixelsHigh)")
