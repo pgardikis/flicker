@@ -34,6 +34,7 @@ flicker/
 - **It remembers one number between warnings**: the percentage at the last warning. A reminder is due once the battery has dropped another *Remind again every* below that number. With reminders set to Never, it warns once.
 - **The critical level breaks through.** Any warning while the battery is below the critical level is a critical alert, including the first one when you unplug or start the app already below it. Dropping into the critical level also always warns, even if no reminder is due or reminders are off.
 - **Mute holds warnings back without losing them.** While muted, a non-critical warning is skipped before the remembered percentage is updated. When the mute ends, the app re-evaluates straight away, so a warning that came due meanwhile fires then. A mute ends when its timer runs out, when you click Unmute, or when you plug in, and it's kept in memory only, so quitting the app clears it.
+- **Plugging in clears the warning.** The banner is removed from Notification Center and an open alert closes, since the warning has been answered.
 - **One alert at a time.** An alert waits for you to click OK. A warning that arrives while one is open still plays its sound, but its dialog is dropped rather than shown afterwards, so dialogs never stack.
 
 Test warnings from Settings ignore all of this and always fire.

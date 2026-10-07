@@ -37,7 +37,7 @@ enum Notifier {
             message = time.map { "\(percent)% · about \($0) left" } ?? "\(percent)% left"
         }
 
-        playSound()
+        playSound(name: critical != nil ? Settings.criticalSound : Settings.sound)
 
         // Focus can hide a notification but not an alert, so a critical warning is always an alert
         if let critical {
@@ -54,6 +54,14 @@ enum Notifier {
         let hours = minutes / 60, rest = minutes % 60
         if hours == 0 { return "\(rest) min" }
         return rest == 0 ? "\(hours) hr" : "\(hours) hr \(rest) min"
+    }
+
+    /// Plugging in answers the warning, so the banner leaves Notification Center and an open
+    /// alert closes.
+    static func clearWarning() {
+        UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [warningIdentifier])
+        // The power source callback and timers run in common modes, so this lands inside runModal
+        if alertShowing { NSApp.abortModal() }
     }
 
     /// The Options menu on the banner, which offers the panel's mute choices.
@@ -106,7 +114,9 @@ enum Notifier {
         if !critical {
             alert.addButton(withTitle: "Mute 1 Hour")
         }
-        if alert.runModal() == .alertSecondButtonReturn {
+        let response = alert.runModal()
+        alert.window.orderOut(nil)
+        if response == .alertSecondButtonReturn {
             BatteryMonitor.shared.mute(for: 60 * 60)
         }
     }

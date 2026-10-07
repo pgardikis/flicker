@@ -169,10 +169,13 @@ final class BatteryMonitor: ObservableObject {
     private func readBattery() {
         let wasOnBattery = onBattery
         defer {
-            if wasOnBattery && !onBattery && isMuted {
-                muteTimer?.invalidate()
-                muteTimer = nil
-                mutedUntil = nil
+            if wasOnBattery && !onBattery {
+                Notifier.clearWarning()
+                if isMuted {
+                    muteTimer?.invalidate()
+                    muteTimer = nil
+                    mutedUntil = nil
+                }
             }
         }
 

@@ -9,6 +9,7 @@ struct PanelView: View {
     @AppStorage(Settings.criticalKey) private var critical = Settings.defaultCritical
     @AppStorage(Settings.remindEveryKey) private var remindEvery = Settings.defaultRemindEvery
     @AppStorage(Settings.soundKey) private var sound = Settings.defaultSound
+    @AppStorage(Settings.criticalSoundKey) private var criticalSound = Settings.defaultCriticalSound
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -139,7 +140,14 @@ struct PanelView: View {
         let level = effectiveCritical > 0
             ? Text("Critical alert below ") + Text("\(effectiveCritical)%").bold().foregroundStyle(.primary)
             : Text("No critical level")
-        return level + Text(" · \(sound.isEmpty ? "No sound" : sound)")
+        let sounds = soundName(sound)
+            + (effectiveCritical > 0 && criticalSound != Settings.sameSound && criticalSound != sound
+                ? ", critical \(soundName(criticalSound))" : "")
+        return level + Text(" · \(sounds)")
+    }
+
+    private func soundName(_ name: String) -> String {
+        name.isEmpty ? "No sound" : name
     }
 
     /// Matches Settings.critical: a level at or above the threshold can't apply.

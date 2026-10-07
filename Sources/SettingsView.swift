@@ -10,6 +10,7 @@ struct SettingsView: View {
     @AppStorage(Settings.remindEveryKey) private var remindEvery = Settings.defaultRemindEvery
     @AppStorage(Settings.styleKey) private var style = Settings.defaultStyle
     @AppStorage(Settings.soundKey) private var sound = Settings.defaultSound
+    @AppStorage(Settings.criticalSoundKey) private var criticalSound = Settings.defaultCriticalSound
     @AppStorage(Settings.volumeKey) private var volume = Settings.defaultVolume
     @AppStorage(Settings.showPercentKey) private var showPercent = Settings.defaultShowPercent
     @AppStorage(Settings.showInDockKey) private var showInDock = Settings.defaultShowInDock
@@ -83,6 +84,26 @@ struct SettingsView: View {
                     }
                 }
 
+                LabeledContent("Critical sound") {
+                    HStack {
+                        Picker("Critical sound", selection: $criticalSound) {
+                            Text("Same as Sound").tag(Settings.sameSound)
+                            Text("None").tag("")
+                            ForEach(Notifier.availableSounds, id: \.self) { Text($0).tag($0) }
+                        }
+                        .labelsHidden()
+                        .fixedSize()
+                        Button {
+                            Notifier.playSound(name: resolvedCriticalSound, volume: volume)
+                        } label: {
+                            Image(systemName: "play.fill")
+                        }
+                        .help("Preview sound")
+                        .disabled(resolvedCriticalSound.isEmpty)
+                    }
+                }
+                .disabled(critical == 0 || critical >= threshold)
+
                 // Stored as an afplay multiplier of the speaker volume; shown as a percentage of it
                 LabeledContent("Volume") {
                     HStack {
@@ -94,7 +115,7 @@ struct SettingsView: View {
                     }
                 }
                 .help("Relative to your speaker volume: 100% plays at the speaker volume")
-                .disabled(sound.isEmpty)
+                .disabled(sound.isEmpty && resolvedCriticalSound.isEmpty)
 
                 LabeledContent("Test warning") {
                     Menu("Send") {
@@ -134,6 +155,9 @@ struct SettingsView: View {
             launchAtLogin = SMAppService.mainApp.status == .enabled
         }
     }
+
+    /// What a critical warning plays, with "Same as Sound" resolved.
+    private var resolvedCriticalSound: String { criticalSound == Settings.sameSound ? sound : criticalSound }
 
     private func setLaunchAtLogin(_ enabled: Bool) {
         do {

@@ -7,6 +7,7 @@ enum Settings {
     static let remindEveryKey = "remindEvery"
     static let styleKey = "style"
     static let soundKey = "sound"
+    static let criticalSoundKey = "criticalSound"
     static let volumeKey = "volume"
     static let showPercentKey = "showPercent"
     static let showInDockKey = "showInDock"
@@ -17,6 +18,9 @@ enum Settings {
     static let defaultRemindEvery = 5
     static let defaultStyle = "notification"
     static let defaultSound = "Sosumi"
+    /// The critical sound's value for "use the Sound setting".
+    static let sameSound = "same"
+    static let defaultCriticalSound = sameSound
     static let defaultVolume = 3.0
     static let defaultShowPercent = true
     static let defaultShowInDock = false
@@ -30,6 +34,7 @@ enum Settings {
             remindEveryKey: defaultRemindEvery,
             styleKey: defaultStyle,
             soundKey: defaultSound,
+            criticalSoundKey: defaultCriticalSound,
             volumeKey: defaultVolume,
             showPercentKey: defaultShowPercent,
             showInDockKey: defaultShowInDock,
@@ -45,6 +50,11 @@ enum Settings {
     static var remindEvery: Int { UserDefaults.standard.integer(forKey: remindEveryKey) }
     static var style: String { UserDefaults.standard.string(forKey: styleKey) ?? defaultStyle }
     static var sound: String { UserDefaults.standard.string(forKey: soundKey) ?? "" }
+    /// The sound for critical warnings, with "same" resolved to the Sound setting.
+    static var criticalSound: String {
+        let value = UserDefaults.standard.string(forKey: criticalSoundKey) ?? defaultCriticalSound
+        return value == sameSound ? sound : value
+    }
     static var volume: Double { UserDefaults.standard.double(forKey: volumeKey) }
     static var showInDock: Bool { UserDefaults.standard.bool(forKey: showInDockKey) }
 }
