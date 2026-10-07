@@ -12,7 +12,7 @@ macOS only warns when the battery is nearly empty, at a level you can't change, 
 - **Reminders** after every further 1, 2, 5 or 10% drop, or just once
 - **Critical level**: below it, the warning is always an alert that Focus can't hide
 - **Notification or alert**, with any macOS system sound at up to 400% volume
-- **Mute** for 30 minutes, 1 hour or until you plug in
+- **Mute** for 30 minutes, 1 hour or until you plug in, from the panel or straight from the warning
 - **Battery status**: time remaining, charging, fully charged or not charging
 - **Battery health**, maximum capacity and cycle count, as System Settings shows them
 - **Percentage in the menu bar**, an optional **Dock icon**, and **launch at login**

@@ -37,6 +37,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
         DockIcon.show(Settings.showInDock)
         UNUserNotificationCenter.current().delegate = self
         Notifier.requestPermission()
+        Notifier.registerActions()
 
         // Turn on launch at login the first time the app runs
         if !UserDefaults.standard.bool(forKey: Settings.didSetupLoginItemKey) {
@@ -60,5 +61,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
         withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
     ) {
         completionHandler([.banner, .list])
+    }
+
+    /// The banner's Options menu: the mute choices.
+    nonisolated func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse,
+        withCompletionHandler completionHandler: @escaping () -> Void
+    ) {
+        let action = response.actionIdentifier
+        completionHandler()
+        Task { @MainActor in Notifier.handleAction(action) }
     }
 }
