@@ -10,17 +10,21 @@ flicker/
 │   ├── FlickerApp.swift           App entry, launch at login, notification setup
 │   ├── MenuBarLabel.swift         The menu bar icon and its states
 │   ├── DockIcon.swift             The optional Dock icon and opening the panel from it
-│   ├── BatteryMonitor.swift       Reads the battery and decides when to warn
+│   ├── BatteryMonitor.swift       Reads the battery and acts on the warning rules
+│   ├── WarningRules.swift         The warning rules, as a pure function
 │   ├── Notifier.swift             Shows notifications and alerts, plays sounds
 │   ├── PanelView.swift            The menu bar panel: status, health and a settings summary
 │   ├── SettingsParts.swift        Settings' battery preview, style pictures and sound buttons
 │   ├── SettingsView.swift         The Settings window and its tabs
 │   └── Settings.swift             Setting keys and defaults
+├── Tests/
+│   └── WarningRulesTests.swift    Scenarios that check the warning rules
 ├── docs/                          This file, the screenshots and the scripts that make them
 ├── build/                         Created by build.sh, not stored in git
 ├── Info.plist                     App metadata and version (menu bar only by default)
 ├── make-icon.swift                Draws the app icon
 ├── build.sh                       Build, sign and install script
+├── test.sh                        Builds and runs the tests
 ├── README.md                      Install and usage
 ├── AGENTS.md                      Instructions for AI coding agents
 ├── LICENSE                        MIT
@@ -39,6 +43,8 @@ flicker/
 - **One alert at a time.** An alert waits for you to click OK. A warning that arrives while one is open still plays its sound, and closes the open alert to take its place, so dialogs never stack and the one on screen always shows the latest figures. That matters most for a critical warning, which would otherwise wait behind an older one.
 
 Test warnings from Settings ignore all of this and always fire.
+
+The rules live in `WarningRules.decide`, which takes only numbers and flags, so `test.sh` can check them without a battery. Each scenario in `Tests/WarningRulesTests.swift` steps through battery levels in order and states when Flicker should warn.
 
 ## Implementation notes
 

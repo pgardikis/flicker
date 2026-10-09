@@ -317,27 +317,12 @@ final class BatteryMonitor: ObservableObject {
         guard let percent else { return }
         let threshold = Settings.threshold
         let critical = Settings.critical
-
-        // Reset when charging or back above threshold, so the next drop warns again
-        if !onBattery || percent >= threshold {
-            lastWarned = nil
-            return
-        }
-
-        let isCritical = critical > 0 && percent < critical
-        if let lastWarned {
-            // Dropping into the critical level always warns, even with reminders off
-            let enteredCritical = isCritical && lastWarned >= critical
-            let remindEvery = Settings.remindEvery
-            if !enteredCritical && (remindEvery <= 0 || percent > lastWarned - remindEvery) { return }
-        }
-
-        // The critical level gets through a mute: that's where a missed warning costs unsaved
-        // work. Returning before lastWarned is set means the held-back warning fires on unmute.
-        if isMuted && !isCritical { return }
-
-        lastWarned = percent
-        Notifier.warn(percent: percent, threshold: threshold, critical: isCritical ? critical : nil,
+        let decision = WarningRules.decide(percent: percent, onBattery: onBattery, threshold: threshold,
+                                           critical: critical, remindEvery: Settings.remindEvery,
+                                           lastWarned: lastWarned, muted: isMuted)
+        lastWarned = decision.lastWarned
+        guard decision.warn else { return }
+        Notifier.warn(percent: percent, threshold: threshold, critical: decision.critical ? critical : nil,
                       minutesRemaining: minutesRemaining)
     }
 }
