@@ -77,14 +77,14 @@ struct StylePicker: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            card(tag: "notification", title: "Banner")
-            card(tag: "alert", title: "Alert")
+            card(tag: Settings.bannerStyle, title: "Banner")
+            card(tag: Settings.alertStyle, title: "Alert")
         }
         .padding(.vertical, 4)
         .accessibilityRepresentation {
             Picker("Style", selection: $style) {
-                Text("Banner").tag("notification")
-                Text("Alert").tag("alert")
+                Text("Banner").tag(Settings.bannerStyle)
+                Text("Alert").tag(Settings.alertStyle)
             }
         }
     }
@@ -95,7 +95,7 @@ struct StylePicker: View {
             style = tag
         } label: {
             VStack(spacing: 8) {
-                StyleThumbnail(banner: tag == "notification")
+                StyleThumbnail(banner: tag == Settings.bannerStyle)
                     .frame(height: 96)
                     .overlay {
                         if selected {

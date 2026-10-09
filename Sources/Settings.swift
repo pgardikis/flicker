@@ -16,7 +16,10 @@ enum Settings {
     static let defaultThreshold = 40
     static let defaultCritical = 10
     static let defaultRemindEvery = 5
-    static let defaultStyle = "notification"
+    /// The stored Style values. "notification" is shown as Banner.
+    static let bannerStyle = "notification"
+    static let alertStyle = "alert"
+    static let defaultStyle = bannerStyle
     static let defaultSound = "Sosumi"
     /// The critical sound's value for "use the Sound setting".
     static let sameSound = "same"

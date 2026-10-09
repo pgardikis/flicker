@@ -47,7 +47,7 @@ enum Notifier {
         // Focus can hide a notification but not an alert, so a critical warning is always an alert
         if let critical {
             showAlert(title: title, message: message, percent: percent, level: critical, critical: true)
-        } else if Settings.style == "alert" {
+        } else if Settings.style == Settings.alertStyle {
             showAlert(title: title, message: message, percent: percent, level: threshold, critical: false)
         } else {
             postNotification(title: title, message: message)
