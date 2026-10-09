@@ -25,13 +25,19 @@ struct PanelView: View {
                 }
             }
             if monitor.percent != nil, let healthLine {
-                Label {
-                    healthLine.fixedSize(horizontal: false, vertical: true)
-                } icon: {
-                    Image(systemName: monitor.healthIsNormal ? "checkmark.seal.fill" : "exclamationmark.triangle.fill")
-                        .foregroundStyle(monitor.healthIsNormal ? Self.statusGreen : .red)
+                // The icon stands for the rating, so with no rating there's no icon, rather than a
+                // red warning for a battery nothing is known to be wrong with
+                if monitor.healthRating != nil {
+                    Label {
+                        healthLine.fixedSize(horizontal: false, vertical: true)
+                    } icon: {
+                        Image(systemName: monitor.healthIsNormal ? "checkmark.seal.fill" : "exclamationmark.triangle.fill")
+                            .foregroundStyle(monitor.healthIsNormal ? Self.statusGreen : .red)
+                    }
+                    .font(.caption)
+                } else {
+                    healthLine.fixedSize(horizontal: false, vertical: true).font(.caption)
                 }
-                .font(.caption)
             }
             Divider()
 
