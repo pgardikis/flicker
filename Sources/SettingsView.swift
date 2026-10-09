@@ -96,7 +96,7 @@ struct SettingsView: View {
 
                     LabeledContent {
                         HStack {
-                            SoundPreviewButton { Notifier.playSound(name: resolvedCriticalSound, volume: volume) }
+                            SoundPreviewButton(label: "Preview critical sound") { Notifier.playSound(name: resolvedCriticalSound, volume: volume) }
                                 .disabled(resolvedCriticalSound.isEmpty)
                             Picker("Critical sound", selection: $criticalSound) {
                                 Text("Same as Sound").tag(Settings.sameSound)

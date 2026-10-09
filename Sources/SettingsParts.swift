@@ -160,6 +160,8 @@ private struct StyleThumbnail: View {
 
 /// A round speaker button that plays a sound once, shown before its picker.
 struct SoundPreviewButton: View {
+    /// What VoiceOver and the tooltip call it, so the two buttons can be told apart.
+    var label = "Preview sound"
     let action: () -> Void
 
     var body: some View {
@@ -171,7 +173,7 @@ struct SoundPreviewButton: View {
                 .contentShape(Circle())
         }
         .buttonStyle(.plain)
-        .help("Preview sound")
-        .accessibilityLabel("Preview sound")
+        .help(label)
+        .accessibilityLabel(label)
     }
 }
