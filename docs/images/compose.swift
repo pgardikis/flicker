@@ -1,6 +1,6 @@
 // Combines the screenshots into screenshots-light.png and screenshots-dark.png for the README, which
 // shows the one matching the visitor's GitHub theme. Each has the menu bar icon, the menu bar panel
-// and the Settings window down one column, labelled, in that appearance, with the other appearance
+// and the Settings window down one column, labeled, in that appearance, with the other appearance
 // peeking out behind like a stacked card. Run by update-screenshots.sh from the repo root.
 import AppKit
 
@@ -98,7 +98,7 @@ for front in ["light", "dark"] {
                 draw(caption, size: 17, weight: .medium, color: ink, in: box, centered: true)
             }
         }
-        // Each label is centred on its front item; the menu bar's on the whole group: both strips
+        // Each label is centered on its front item; the menu bar's on the whole group: both strips
         // and the captions
         let frontTop = bottom + height - peek.height
         let labelMidY = row.name == "menubar"

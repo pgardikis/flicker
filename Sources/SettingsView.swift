@@ -182,7 +182,7 @@ struct SettingsView: View {
     }
 
 
-    /// A row title with a grey note under it, as System Settings explains a setting in place.
+    /// A row title with a gray note under it, as System Settings explains a setting in place.
     private func titled(_ title: String, note: String) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(title)

@@ -150,7 +150,7 @@ enum Notifier {
                     content.body = message
                     content.categoryIdentifier = warningIdentifier
                     // A low battery is worth breaking through Focus / Do Not Disturb, but
-                    // macOS honours this only with the com.apple.developer.usernotifications
+                    // macOS honors this only with the com.apple.developer.usernotifications
                     // .time-sensitive entitlement, which needs a provisioning profile from a
                     // paid Developer ID. Ad-hoc signing can't have it: embedding it anyway
                     // makes AMFI refuse to launch the app. So this is a no-op on an ad-hoc
@@ -176,7 +176,7 @@ enum Notifier {
     }
 }
 
-/// The battery level drawn as a battery, with a labelled tick at the warning or critical level.
+/// The battery level drawn as a battery, with a labeled tick at the warning or critical level.
 private final class LevelBar: NSView {
     private let percent: Int
     private let level: Int
