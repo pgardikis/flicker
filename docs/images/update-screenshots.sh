@@ -3,7 +3,7 @@
 # screenshots-light.png and screenshots-dark.png.
 # The Settings window images, settings-light.png and settings-dark.png, are real captures of an
 # active window, since a window drawn by this script would look inactive; it leaves them as they are.
-set -e
+set -euo pipefail
 
 cd "$(dirname "$0")/../.."
 mkdir -p build
