@@ -1,0 +1,23 @@
+# Runs the warning rule tests and a full universal build on every push to main, the same way
+# test.sh and build.sh run locally. Notifications, alerts and screenshots need a logged-in Mac,
+# so they aren't covered here.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test-and-build:
+    runs-on: macos-15
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Swift version
+        run: swift --version
+      - name: Tests
+        run: ./test.sh
+      - name: Build
+        run: ./build.sh
