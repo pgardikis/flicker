@@ -40,7 +40,7 @@ The app isn't notarized, so build it on each Mac you want to use it on. Run `./b
 
 ## Usage
 
-Click the charging station icon in the menu bar to open the panel. It shows the battery, its health and a summary of your warnings. The bell mutes warnings. **Settings…** opens the Settings window, with **Warnings**, **Alert & Sound** and **General** tabs. Changes apply straight away, a battery picture shows your warning and critical levels, and **Test warning** sends a warning with your current style and sound. **About** shows the version.
+Click the charging station icon in the menu bar to open the panel. It shows the battery, its health and a summary of your warnings. The bell mutes warnings. **Settings…** opens the Settings window, with **Warnings**, **Alert & Sound** and **General** tabs. Changes apply straight away, a battery picture shows your warning and critical levels, and **Test warning** sends a warning with your current style and sound. The panel's **About** button shows the version.
 
 | Setting | Default | Options | What it does |
 |---|---|---|---|
