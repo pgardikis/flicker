@@ -17,7 +17,7 @@ macOS only warns when the battery is nearly empty, at a level you can't change, 
 - **Low battery warnings** below a level you choose, from 5% to 95%
 - **Reminders** after every further 1, 2, 5 or 10% drop, or just once
 - **Critical level**: below it, the warning is always an alert that Focus can't hide
-- **Banner or alert**, with any macOS system sound at up to 400% volume
+- **Banner or alert**, with any classic macOS alert sound at up to 400% volume
 - **Mute** for 30 minutes, 1 hour or until you plug in, from the panel or straight from the warning
 - **Battery status**: time remaining, charging, fully charged or not charging
 - **Battery health**, maximum capacity and cycle count, as System Settings shows them
@@ -48,14 +48,16 @@ Click the charging station icon in the menu bar to open the panel. It shows the 
 | Critical level | 10% | Off, 5, 10, 15, 20% | Below this, always warns with an alert |
 | Remind again every | 5% drop | Never, 1, 2, 5, 10% drop | Warns again after each further drop (Never warns once) |
 | Style | Banner | Banner, Alert | A notification banner, or a dialog that stays until you click OK or plug in |
-| Sound | Sosumi | Any system sound, None | Played with every warning |
-| Critical sound | Same as Sound | Same as Sound, any system sound, None | Played instead below the critical level |
+| Sound | Sosumi | Any classic alert sound, None | Played with every warning |
+| Critical sound | Same as Sound | Same as Sound, any classic alert sound, None | Played instead below the critical level |
 | Volume | 300% | 50–400% | How loud the sound plays (see below) |
 | Show in Dock | Off | On, Off | Also shows the app in the Dock and the ⌘Tab app switcher. Clicking the Dock icon opens the panel |
 | Show percentage in menu bar | On | On, Off | Shows the level next to the charging station |
 | Launch at login | On | On, Off | Starts the app when you log in |
 
 The critical level always stays below *Warn below*: Settings only offers lower values, and moves it down if you drag *Warn below* under it, or turns it off if nothing lower is left.
+
+The sounds are the classic ones in `/System/Library/Sounds`, such as Basso, Glass and Sosumi. Newer alert sounds such as Boop aren't offered, since macOS keeps them out of that folder.
 
 Volume is relative to your speaker volume: 100% plays the sound at that volume, and higher values amplify the sound itself. Your Mac's volume setting is never changed, and if your Mac is muted, the warning sound is silent too.
 
