@@ -30,7 +30,7 @@ A macOS 14+ menu bar app (SwiftUI `MenuBarExtra`, no Dock icon by default via `L
 
 ## Versions
 
-- The version is `CFBundleShortVersionString` in `Info.plist` (with `CFBundleVersion` as the build number), shown in the About window, with `NSHumanReadableCopyright` as its copyright line. Each version has an annotated git tag `vX.Y` on the commit that sets it; there are no GitHub Releases or binaries.
+- The version is `CFBundleShortVersionString` in `Info.plist` (with `CFBundleVersion` as the build number), shown in the About window, with `NSHumanReadableCopyright` as its copyright line. Each version has an annotated git tag on the commit that sets it, `vX.Y` for features and `vX.Y.Z` for fixes only (the build number goes up by one each time); there are no GitHub Releases or binaries.
 
 ## Constraints to preserve
 
