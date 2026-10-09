@@ -14,7 +14,7 @@ A macOS 14+ menu bar app (SwiftUI `MenuBarExtra`, no Dock icon by default via `L
 
 - CI (`.github/workflows/ci.yml`, GitHub Actions on `macos-15`) runs `./test.sh` and a plain `./build.sh` on every push to main and on pull requests. The README shows its badge and a version badge from the latest tag.
 
-- The compiler runs in **Swift 6 language mode** (`-swift-version 6`) with `-parse-as-library`, once per arch (arm64, x86_64), then merged with `lipo`. Strict concurrency errors will fail the build.
+- The compiler runs in **Swift 6 language mode** (`-swift-version 6`) with `-parse-as-library`, once per arch (arm64, x86_64) in parallel, then merged with `lipo`. Strict concurrency errors will fail the build.
 - `test.sh` compiles `Sources/WarningRules.swift` with `Tests/*.swift` into a plain executable (no XCTest, so no Xcode) and exits non-zero on a failure. It covers only the warning rules; there's no linter. Verify UI and alert changes by building, installing, and using **Test warning** in Settings.
 - Run the app from `/Applications`. A second running copy (for example the one in `build/`) detects the first by bundle ID and quits itself at launch.
 

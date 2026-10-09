@@ -70,7 +70,7 @@ The rules live in `WarningRules.decide`, which takes only numbers and flags, so 
 
 A `.app` is a folder with a fixed layout. Without Xcode, the script builds it by hand:
 
-1. Compiles `Sources/*.swift` with `swiftc` once per architecture, then merges them with `lipo` into a universal `Flicker.app/Contents/MacOS/Flicker`
+1. Compiles `Sources/*.swift` with `swiftc` once per architecture, both at the same time, then merges them with `lipo` into a universal `Flicker.app/Contents/MacOS/Flicker`
 2. Draws the icon with `make-icon.swift`, then converts it to `AppIcon.icns` with `iconutil`
 3. Copies `Info.plist` into the bundle
 4. Signs the app with an ad-hoc signature and **hardened runtime** (`codesign --options runtime --sign -`). macOS requires a signature before an app can send notifications or launch at login.

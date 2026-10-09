@@ -10,10 +10,25 @@ rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 
 echo "Compiling (universal: arm64 + x86_64)..."
-for arch in arm64 x86_64; do
+# The two compiles don't depend on each other, so they run side by side, each logging to its own
+# file so their messages don't interleave. A failed one prints its log and stops the build.
+ARCHES=(arm64 x86_64)
+PIDS=()
+for arch in "${ARCHES[@]}"; do
   swiftc -O -parse-as-library -swift-version 6 -target "$arch-apple-macos14.0" \
-    Sources/*.swift -o "$BUILD/Flicker-$arch"
+    Sources/*.swift -o "$BUILD/Flicker-$arch" > "$BUILD/compile-$arch.log" 2>&1 &
+  PIDS+=($!)
 done
+FAILED=0
+for i in "${!ARCHES[@]}"; do
+  if ! wait "${PIDS[$i]}"; then
+    echo "Compiling for ${ARCHES[$i]} failed:" >&2
+    cat "$BUILD/compile-${ARCHES[$i]}.log" >&2
+    FAILED=1
+  fi
+done
+[ "$FAILED" -eq 0 ] || exit 1
+rm -f "$BUILD"/compile-*.log
 lipo -create "$BUILD/Flicker-arm64" "$BUILD/Flicker-x86_64" \
   -output "$APP/Contents/MacOS/Flicker"
 rm -f "$BUILD/Flicker-arm64" "$BUILD/Flicker-x86_64"
