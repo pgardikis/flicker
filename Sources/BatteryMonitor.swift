@@ -157,11 +157,12 @@ final class BatteryMonitor: ObservableObject {
     /// Mutes warnings below the critical level, for `duration` or, when nil, until the charger is
     /// connected. Plugging in ends any mute.
     func mute(for duration: TimeInterval?) {
+        // On the adapter there's no unplug to wait for; the mute would last into the next one.
+        // Checked first, so a timed mute already running keeps its timer.
+        if duration == nil && !onBattery { return }
         muteTimer?.invalidate()
         muteTimer = nil
         guard let duration else {
-            // On the adapter there's no unplug to wait for; the mute would last into the next one
-            guard onBattery else { return }
             mutedUntil = .distantFuture
             return
         }

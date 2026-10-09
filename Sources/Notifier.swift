@@ -96,7 +96,8 @@ enum Notifier {
         guard !name.isEmpty, availableSounds.contains(name) else { return }
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/bin/afplay")
-        process.arguments = ["-v", String(volume), "\(soundsDirectory)/\(name).aiff"]
+        // Clamped here so every caller, the Settings previews included, stays within the slider's range
+        process.arguments = ["-v", String(min(max(volume, 0.5), 4)), "\(soundsDirectory)/\(name).aiff"]
         try? process.run()
     }
 

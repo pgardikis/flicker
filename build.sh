@@ -34,8 +34,10 @@ echo "Built $APP"
 
 if [ "${1:-}" = "--install" ]; then
   INSTALLED="/Applications/Flicker.app"
-  # Match the installed copy by its path, not any process that happens to be named Flicker
-  RUNNING="^$INSTALLED/Contents/MacOS/Flicker"
+  # Any running Flicker build, wherever it is (a copy from build/ would make the new one quit
+  # itself as a second instance), but not other processes that happen to be named Flicker
+  RUNNING='Flicker\.app/Contents/MacOS/Flicker$'
+  INSTALLED_RUNNING="^$INSTALLED/Contents/MacOS/Flicker"
 
   # Quit the old instance and wait for it to exit (force quit after 5s)
   pkill -f "$RUNNING" 2>/dev/null || true
@@ -47,7 +49,7 @@ if [ "${1:-}" = "--install" ]; then
 
   # Launch Services may need a moment to register the new copy (error -600), so retry
   for attempt in 1 2 3 4 5; do
-    if open "$INSTALLED" 2>/dev/null && sleep 1 && pgrep -f "$RUNNING" >/dev/null; then
+    if open "$INSTALLED" 2>/dev/null && sleep 1 && pgrep -f "$INSTALLED_RUNNING" >/dev/null; then
       echo "Installed to /Applications and launched"
       exit 0
     fi
