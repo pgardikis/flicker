@@ -1,5 +1,8 @@
 # Flicker
 
+[![CI](https://github.com/pgardikis/flicker/actions/workflows/ci.yml/badge.svg)](https://github.com/pgardikis/flicker/actions/workflows/ci.yml)
+[![Version](https://img.shields.io/github/v/tag/pgardikis/flicker?label=version&sort=semver)](https://github.com/pgardikis/flicker/tags)
+
 A lightweight macOS menu bar app for low battery warnings at the level you choose, with reminders and alerts Focus can't hide.
 
 macOS only warns when the battery is nearly empty, at a level you can't change, with a notification that's easy to miss. Flicker warns earlier, keeps warning as the battery drops, and plays a sound loud enough to notice.
