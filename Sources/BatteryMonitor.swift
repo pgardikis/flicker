@@ -1,4 +1,4 @@
-import Foundation
+import AppKit
 import IOKit
 import IOKit.ps
 
@@ -117,10 +117,22 @@ final class BatteryMonitor: ObservableObject {
         }
         RunLoop.main.add(timer, forMode: .common)
         self.timer = timer
+
+        // Timers don't count time asleep, so re-check straight away on wake
+        NSWorkspace.shared.notificationCenter.addObserver(forName: NSWorkspace.didWakeNotification, object: nil,
+                                                          queue: .main) { _ in
+            MainActor.assumeIsolated { BatteryMonitor.shared.refresh() }
+        }
     }
 
     func refresh() {
         readBattery()
+        // The date decides when a mute ends: its timer runs late if the Mac slept meanwhile
+        if let mutedUntil, mutedUntil <= Date() {
+            muteTimer?.invalidate()
+            muteTimer = nil
+            self.mutedUntil = nil
+        }
         evaluate()
     }
 

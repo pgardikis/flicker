@@ -14,6 +14,11 @@ enum Notifier {
     /// True while a modal alert is on screen, so a second warning can't stack another dialog.
     private static var alertShowing = false
 
+    /// A warning that arrived while an alert was open. It replaces that alert, so the dialog on
+    /// screen always shows the latest figures and a critical warning is never lost behind it.
+    private struct PendingAlert { let title: String, message: String, percent: Int, level: Int, critical: Bool }
+    private static var pendingAlert: PendingAlert?
+
     /// The system sounds directory doesn't change while the app runs, so list it once.
     static let availableSounds: [String] = {
         let files = (try? FileManager.default.contentsOfDirectory(atPath: soundsDirectory)) ?? []
@@ -60,6 +65,7 @@ enum Notifier {
     /// alert closes.
     static func clearWarning() {
         UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [warningIdentifier])
+        pendingAlert = nil
         // The power source callback and timers run in common modes, so this lands inside runModal
         if alertShowing { NSApp.abortModal() }
     }
@@ -96,10 +102,22 @@ enum Notifier {
 
     /// `level` is the warning or critical level, marked on the alert's level bar.
     private static func showAlert(title: String, message: String, percent: Int, level: Int, critical: Bool) {
-        // runModal blocks here, so a warning arriving meanwhile must not open a second dialog
-        guard !alertShowing else { return }
+        // runModal blocks here, so a warning arriving meanwhile closes the open dialog and takes
+        // its place once runModal returns, rather than stacking a second one. The closed dialog
+        // returns .abort, never the Mute button's response, so replacing it can't mute.
+        guard !alertShowing else {
+            pendingAlert = PendingAlert(title: title, message: message, percent: percent, level: level, critical: critical)
+            NSApp.abortModal()
+            return
+        }
         alertShowing = true
-        defer { alertShowing = false }
+        defer {
+            alertShowing = false
+            if let next = pendingAlert {
+                pendingAlert = nil
+                showAlert(title: next.title, message: next.message, percent: next.percent, level: next.level, critical: next.critical)
+            }
+        }
 
         // Asks to come forward; macOS may decline while the user works in another app, which is
         // fine: a modal alert floats above other apps' windows either way, without taking focus
