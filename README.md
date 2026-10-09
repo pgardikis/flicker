@@ -6,7 +6,7 @@ macOS only warns when the battery is nearly empty, at a level you can't change, 
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/images/screenshots-dark.png">
-  <img src="docs/images/screenshots-light.png" alt="Flicker's menu bar icon (normal, low battery with an exclamation mark, muted crossed out), the menu bar panel (80% on battery with 3:05 remaining, battery health Normal, maximum capacity 80%, 1,061 cycles, a summary of the warning settings, and Settings and Quit buttons) and the Settings window (Warnings: warn below 40%, critical level 10%, remind every 5% drop; Alert: notification style, Sosumi sound, critical sound same as Sound, 300% volume, test warning; General: show in Dock, percentage in menu bar, launch at login; version 1.0 at the bottom), each with its other appearance behind it">
+  <img src="docs/images/screenshots-light.png" alt="Flicker's menu bar icon (normal, low battery with an exclamation mark, muted crossed out), the menu bar panel (53% on battery with 1:21 remaining, battery health Normal, maximum capacity 80%, 1,063 cycles, a summary of the warning settings, and Settings, About and Quit buttons) and the Settings window's Alert & Sound tab (Banner and Alert style pictures with Banner selected, test warning; sound Sosumi, critical sound same as Sound, 300% volume), each with its other appearance behind it">
 </picture>
 
 ## Features
@@ -14,7 +14,7 @@ macOS only warns when the battery is nearly empty, at a level you can't change, 
 - **Low battery warnings** below a level you choose, from 5% to 95%
 - **Reminders** after every further 1, 2, 5 or 10% drop, or just once
 - **Critical level**: below it, the warning is always an alert that Focus can't hide
-- **Notification or alert**, with any macOS system sound at up to 400% volume
+- **Banner or alert**, with any macOS system sound at up to 400% volume
 - **Mute** for 30 minutes, 1 hour or until you plug in, from the panel or straight from the warning
 - **Battery status**: time remaining, charging, fully charged or not charging
 - **Battery health**, maximum capacity and cycle count, as System Settings shows them
@@ -37,14 +37,14 @@ The app isn't notarized, so build it on each Mac you want to use it on. Run `./b
 
 ## Usage
 
-Click the charging station icon in the menu bar to open the panel. It shows the battery, its health and a summary of your warnings. The bell mutes warnings. **Settings…** opens the Settings window, where changes apply straight away and **Test warning** sends a warning with your current style and sound.
+Click the charging station icon in the menu bar to open the panel. It shows the battery, its health and a summary of your warnings. The bell mutes warnings. **Settings…** opens the Settings window, with **Warnings**, **Alert & Sound** and **General** tabs. Changes apply straight away, a battery picture shows your warning and critical levels, and **Test warning** sends a warning with your current style and sound. **About** shows the version.
 
 | Setting | Default | Options | What it does |
 |---|---|---|---|
 | Warn below | 40% | 5–95% | Warns when on battery and below this level |
 | Critical level | 10% | Off, 5, 10, 15, 20% | Below this, always warns with an alert |
 | Remind again every | 5% drop | Never, 1, 2, 5, 10% drop | Warns again after each further drop (Never warns once) |
-| Style | Notification | Notification, Alert | A banner, or a dialog that stays until you click OK or plug in |
+| Style | Banner | Banner, Alert | A notification banner, or a dialog that stays until you click OK or plug in |
 | Sound | Sosumi | Any system sound, None | Played with every warning |
 | Critical sound | Same as Sound | Same as Sound, any system sound, None | Played instead below the critical level |
 | Volume | 300% | 50–400% | How loud the sound plays (see below) |

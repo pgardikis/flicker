@@ -13,7 +13,8 @@ flicker/
 │   ├── BatteryMonitor.swift       Reads the battery and decides when to warn
 │   ├── Notifier.swift             Shows notifications and alerts, plays sounds
 │   ├── PanelView.swift            The menu bar panel: status, health and a settings summary
-│   ├── SettingsView.swift         The Settings window
+│   ├── SettingsParts.swift        Settings' battery preview, style pictures and sound buttons
+│   ├── SettingsView.swift         The Settings window and its tabs
 │   └── Settings.swift             Setting keys and defaults
 ├── docs/                          This file, the screenshots and the scripts that make them
 ├── build/                         Created by build.sh, not stored in git
@@ -54,7 +55,8 @@ Test warnings from Settings ignore all of this and always fire.
 - **Launch at login**: registered with `SMAppService.mainApp`.
 - **Single instance**: a second copy (say the one in `build/`) sees the running one by bundle ID and quits at launch, so there are never two icons or duplicate warnings.
 - **Menu bar only by default**: `LSUIElement` in `Info.plist` hides the Dock icon and app menu.
-- **Version**: `CFBundleShortVersionString` in `Info.plist`, shown at the bottom of the Settings window. Each version has a matching annotated git tag, such as `v1.0`.
+- **Version**: `CFBundleShortVersionString` in `Info.plist`, shown in the standard About window that the panel's **About** button opens, along with the copyright from `NSHumanReadableCopyright`. Each version has a matching annotated git tag, such as `v1.0`.
+- **Settings tabs**: Warnings, Alert & Sound, and General, as toolbar tabs. The window takes the tab's name as its title and resizes to each tab, so even the tallest stays well within a small MacBook screen. The battery preview in Warnings redraws as the levels change, and VoiceOver reads it as text. The Banner and Alert pictures act as one picker for keyboard and VoiceOver users.
 - **Optional Dock icon**: *Show in Dock* switches the app's activation policy between regular and accessory, so the icon appears or disappears without a relaunch, along with the ⌘Tab entry and the app menu. SwiftUI's menu bar item has no API to open its panel, so a click on the Dock icon finds the app's own menu bar icon and clicks it. That relies on AppKit's private `NSStatusBarWindow` class name; if the icon can't be found, the click opens Settings instead, through the app menu's Settings… item.
 
 ## What `build.sh` does

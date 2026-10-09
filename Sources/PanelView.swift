@@ -47,6 +47,7 @@ struct PanelView: View {
             HStack {
                 Button("Settings…") { showSettings() }
                 Spacer()
+                Button("About") { showAbout() }
                 Button("Quit") { NSApp.terminate(nil) }
             }
         }
@@ -152,6 +153,14 @@ struct PanelView: View {
 
     /// Matches Settings.critical: a level at or above the threshold can't apply.
     private var effectiveCritical: Int { critical < threshold ? critical : 0 }
+
+    /// The standard About window: icon, name, version and copyright from Info.plist.
+    private func showAbout() {
+        let panel = NSApp.keyWindow
+        NSApp.activate()
+        NSApp.orderFrontStandardAboutPanel(nil)
+        panel?.close()
+    }
 
     private func showSettings() {
         // The panel is the key window while its button is being clicked. Closing it leaves the
