@@ -41,7 +41,8 @@ enum Settings {
         ])
     }
 
-    static var threshold: Int { UserDefaults.standard.integer(forKey: thresholdKey) }
+    /// Clamped like the volume, since `defaults write` can store anything.
+    static var threshold: Int { min(max(UserDefaults.standard.integer(forKey: thresholdKey), 5), 95) }
     /// 0 when off, or when it isn't below the threshold and so can't apply.
     static var critical: Int {
         let critical = UserDefaults.standard.integer(forKey: criticalKey)
@@ -55,6 +56,6 @@ enum Settings {
         let value = UserDefaults.standard.string(forKey: criticalSoundKey) ?? defaultCriticalSound
         return value == sameSound ? sound : value
     }
-    static var volume: Double { UserDefaults.standard.double(forKey: volumeKey) }
+    static var volume: Double { min(max(UserDefaults.standard.double(forKey: volumeKey), 0.5), 4) }
     static var showInDock: Bool { UserDefaults.standard.bool(forKey: showInDockKey) }
 }

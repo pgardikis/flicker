@@ -30,6 +30,7 @@ final class BatteryMonitor: ObservableObject {
     /// Re-reads while a time estimate is still missing, so the battery controller's figure
     /// shows soon after it appears instead of at the next 60 s poll.
     private var estimateTimer: Timer?
+    private var readingDetails = false
 
     var isMuted: Bool { mutedUntil != nil }
 
@@ -140,9 +141,16 @@ final class BatteryMonitor: ObservableObject {
     /// the panel opens rather than on every refresh. They come from system_profiler so they match
     /// System Settings: IOKit only has raw mAh figures, and its health rating can disagree.
     func refreshDetails() {
+        // Opening the panel again before system_profiler answers shouldn't start a second run
+        guard !readingDetails else { return }
+        readingDetails = true
         Task.detached {
             let details = Self.readDetails()
-            await MainActor.run { self.details = details }
+            await MainActor.run {
+                self.readingDetails = false
+                // Keep the last good reading if this run failed, rather than blanking the health line
+                if let details { self.details = details }
+            }
         }
     }
 
@@ -152,6 +160,8 @@ final class BatteryMonitor: ObservableObject {
         muteTimer?.invalidate()
         muteTimer = nil
         guard let duration else {
+            // On the adapter there's no unplug to wait for; the mute would last into the next one
+            guard onBattery else { return }
             mutedUntil = .distantFuture
             return
         }
