@@ -17,7 +17,8 @@ flicker/
 │   ├── SettingsParts.swift        Settings' battery preview, style pictures and sound buttons
 │   ├── SettingsView.swift         The Settings window and its tabs
 │   └── Settings.swift             Setting keys and defaults
-├── .github/workflows/ci.yml       Runs the tests and a build on every push
+├── .github/workflows/ci.yml       Tests and builds on two macOS images and two toolchains
+├── .github/dependabot.yml         Keeps the CI actions up to date
 ├── Tests/
 │   └── WarningRulesTests.swift    Scenarios that check the warning rules
 ├── docs/                          This file, the screenshots and the scripts that make them
