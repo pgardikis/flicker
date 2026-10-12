@@ -26,7 +26,7 @@ enum Notifier {
     }()
 
     /// The async forms of UserNotifications' calls, never their completion blocks: a block written
-    /// in this main-actor type inherits the main actor, and with the macOS 14 and 15 SDKs the
+    /// in this main-actor type inherits the main actor, and with the macOS 15 SDK the
     /// framework calls it on a background queue, which Swift 6 stops with a crash at launch.
     nonisolated static func requestPermission() {
         Task { _ = try? await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) }

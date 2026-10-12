@@ -3,7 +3,7 @@
 [![Build](https://github.com/pgardikis/flicker/actions/workflows/ci.yml/badge.svg)](https://github.com/pgardikis/flicker/actions/workflows/ci.yml)
 [![Version](https://img.shields.io/github/v/tag/pgardikis/flicker?label=version&sort=semver)](https://github.com/pgardikis/flicker/tags)
 [![License](https://img.shields.io/github/license/pgardikis/flicker)](LICENSE)
-[![Platform](https://img.shields.io/badge/platform-macOS%2014%2B-blue)](#install)
+[![Platform](https://img.shields.io/badge/platform-macOS%2015%2B-blue)](#install)
 [![Swift](https://img.shields.io/badge/Swift-6-F05138?logo=swift&logoColor=white)](https://www.swift.org)
 
 A lightweight macOS menu bar app for low battery warnings at the level you choose, with reminders and alerts Focus can't hide.
@@ -29,7 +29,7 @@ macOS only warns when the battery is nearly empty, at a level you can't change, 
 
 ## Install
 
-You need a MacBook (Intel or Apple Silicon) with macOS 14 (Sonoma) or later, plus the Xcode Command Line Tools (`xcode-select --install`). The full Xcode app isn't needed.
+You need a MacBook (Intel or Apple Silicon) with macOS 15 (Sequoia) or later, plus the Xcode Command Line Tools (`xcode-select --install`). The full Xcode app isn't needed.
 
 ```bash
 git clone https://github.com/pgardikis/flicker.git
