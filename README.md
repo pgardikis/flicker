@@ -1,7 +1,10 @@
 # Flicker
 
-[![CI](https://github.com/pgardikis/flicker/actions/workflows/ci.yml/badge.svg)](https://github.com/pgardikis/flicker/actions/workflows/ci.yml)
+[![Build](https://github.com/pgardikis/flicker/actions/workflows/ci.yml/badge.svg)](https://github.com/pgardikis/flicker/actions/workflows/ci.yml)
 [![Version](https://img.shields.io/github/v/tag/pgardikis/flicker?label=version&sort=semver)](https://github.com/pgardikis/flicker/tags)
+[![License](https://img.shields.io/github/license/pgardikis/flicker)](LICENSE)
+[![Platform](https://img.shields.io/badge/platform-macOS%2014%2B-blue)](#install)
+[![Swift](https://img.shields.io/badge/Swift-6-F05138?logo=swift&logoColor=white)](https://www.swift.org)
 
 A lightweight macOS menu bar app for low battery warnings at the level you choose, with reminders and alerts Focus can't hide.
 
