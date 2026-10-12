@@ -15,8 +15,9 @@ struct SettingsView: View {
     @AppStorage(Settings.showPercentKey) private var showPercent = Settings.defaultShowPercent
     @AppStorage(Settings.showInDockKey) private var showInDock = Settings.defaultShowInDock
 
-    @State private var launchAtLogin = SMAppService.mainApp.status == .enabled
-    @State private var loginError: String?
+    // An ObservableObject rather than @State: in the macOS 27 SDK @State is a macro whose plugin
+    // ships only with Xcode, so the Command Line Tools can't build it
+    @StateObject private var loginItem = LoginItem()
 
     var body: some View {
         // In a Settings scene a TabView becomes toolbar tabs, and the window takes each tab's
@@ -141,9 +142,9 @@ struct SettingsView: View {
                             }
                         Toggle("Show percentage in menu bar", isOn: $showPercent)
                         // An explicit binding, so re-reading the status in onAppear can't re-trigger a write
-                        Toggle("Launch at login", isOn: Binding(get: { launchAtLogin }, set: { setLaunchAtLogin($0) }))
-                        if let loginError {
-                            Text(loginError).font(.caption).foregroundStyle(.red)
+                        Toggle("Launch at login", isOn: Binding(get: { loginItem.enabled }, set: { loginItem.set($0) }))
+                        if let error = loginItem.error {
+                            Text(error).font(.caption).foregroundStyle(.red)
                         }
                     }
                 }
@@ -152,7 +153,7 @@ struct SettingsView: View {
         }
         .onAppear {
             // System Settings can change this behind our back, so re-read every time the window opens
-            launchAtLogin = SMAppService.mainApp.status == .enabled
+            loginItem.reload()
         }
     }
 
@@ -192,19 +193,30 @@ struct SettingsView: View {
 
     /// What a critical warning plays, with "Same as Sound" resolved.
     private var resolvedCriticalSound: String { criticalSound == Settings.sameSound ? sound : criticalSound }
+}
 
-    private func setLaunchAtLogin(_ enabled: Bool) {
+/// Launch at login as the toggle shows it: what macOS reports, plus the last error.
+@MainActor
+private final class LoginItem: ObservableObject {
+    @Published private(set) var enabled = SMAppService.mainApp.status == .enabled
+    @Published private(set) var error: String?
+
+    func reload() {
+        enabled = SMAppService.mainApp.status == .enabled
+    }
+
+    func set(_ on: Bool) {
         do {
-            if enabled {
+            if on {
                 try SMAppService.mainApp.register()
             } else {
                 try SMAppService.mainApp.unregister()
             }
-            loginError = nil
+            error = nil
         } catch {
-            loginError = error.localizedDescription
+            self.error = error.localizedDescription
         }
         // Show what macOS actually did, not what was asked for
-        launchAtLogin = SMAppService.mainApp.status == .enabled
+        reload()
     }
 }
