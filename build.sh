@@ -64,7 +64,7 @@ if [ "${1:-}" = "--install" ]; then
   cp -R "$APP" /Applications/
 
   # Launch Services may need a moment to register the new copy (error -600), so retry
-  for attempt in 1 2 3 4 5; do
+  for _ in 1 2 3 4 5; do
     if open "$INSTALLED" 2>/dev/null && sleep 1 && pgrep -f "$INSTALLED_RUNNING" >/dev/null; then
       echo "Installed to /Applications and launched"
       exit 0
