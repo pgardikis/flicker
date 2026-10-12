@@ -61,6 +61,23 @@ jobs:
         run: ./test.sh
       - name: Build
         run: ./build.sh
+      # build.sh stays quiet when it succeeds, so list any compiler warnings (deprecations from a
+      # newer SDK, say) in the run summary as an early heads-up, without failing the build
+      - name: Compiler warnings
+        run: |
+          warnings=$(grep -h "warning:" build/compile-*.log | sort -u || true)
+          if [ -z "$warnings" ]; then
+            echo "No compiler warnings"
+            exit 0
+          fi
+          count=$(printf '%s\n' "$warnings" | wc -l | tr -d ' ')
+          echo "::warning title=Compiler warnings::$count warning(s), listed in the run summary"
+          {
+            echo "### Compiler warnings (${{ matrix.runner }} · ${{ matrix.toolchain }})"
+            echo '```'
+            printf '%s\n' "$warnings"
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Check the app is universal
         run: |
           archs=$(lipo -archs build/Flicker.app/Contents/MacOS/Flicker)

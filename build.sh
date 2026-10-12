@@ -11,7 +11,9 @@ mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 
 echo "Compiling (universal: arm64 + x86_64)..."
 # The two compiles don't depend on each other, so they run side by side, each logging to its own
-# file so their messages don't interleave. A failed one prints its log and stops the build.
+# file so their messages don't interleave. A failed one prints its log and stops the build. The
+# logs stay in build/ afterwards, so warnings from a successful build can still be read.
+rm -f "$BUILD"/compile-*.log
 ARCHES=(arm64 x86_64)
 PIDS=()
 for arch in "${ARCHES[@]}"; do
@@ -28,7 +30,6 @@ for i in "${!ARCHES[@]}"; do
   fi
 done
 [ "$FAILED" -eq 0 ] || exit 1
-rm -f "$BUILD"/compile-*.log
 lipo -create "$BUILD/Flicker-arm64" "$BUILD/Flicker-x86_64" \
   -output "$APP/Contents/MacOS/Flicker"
 rm -f "$BUILD/Flicker-arm64" "$BUILD/Flicker-x86_64"
