@@ -7,7 +7,7 @@
 # Tools jobs build the way the README tells users to (macOS 27's tools, for example, can't
 # expand SwiftUI's @State, while Xcode's can). The weekly run catches image updates in weeks
 # without a push.
-name: CI
+name: build
 
 on:
   push:
