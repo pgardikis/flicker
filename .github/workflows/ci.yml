@@ -60,3 +60,8 @@ jobs:
         run: ./test.sh
       - name: Build
         run: ./build.sh
+      - name: Check the app is universal
+        run: |
+          archs=$(lipo -archs build/Flicker.app/Contents/MacOS/Flicker)
+          echo "Architectures: $archs"
+          [[ " $archs " == *" arm64 "* && " $archs " == *" x86_64 "* ]]
