@@ -1,6 +1,12 @@
-# Runs the warning rule tests and a full universal build on pushes to main, pull requests and
-# manual runs, the same way test.sh and build.sh run locally. Notifications, alerts and screenshots need a logged-in Mac,
-# so they aren't covered here.
+# Runs the warning rule tests and a full universal build on pushes to main, pull requests,
+# manual runs and every Monday, the same way test.sh and build.sh run locally. Notifications,
+# alerts and screenshots need a logged-in Mac, so they aren't covered here.
+#
+# Each run builds on two images and two toolchains, so a toolchain change shows up without
+# editing a version here: macos-latest moves to newer macOS by itself, and the Command Line
+# Tools jobs build the way the README tells users to (macOS 27's tools, for example, can't
+# expand SwiftUI's @State, while Xcode's can). The weekly run catches image updates in weeks
+# without a push.
 name: CI
 
 on:
@@ -8,6 +14,8 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * 1"
 
 # A newer push to the same pull request cancels its older run; every commit on main still finishes
 concurrency:
@@ -20,12 +28,30 @@ permissions:
 
 jobs:
   test-and-build:
-    runs-on: macos-15
+    name: ${{ matrix.runner }} · ${{ matrix.toolchain }}
+    runs-on: ${{ matrix.runner }}
     timeout-minutes: 15
+    strategy:
+      # Let every combination finish, so a red one points at what differs
+      fail-fast: false
+      matrix:
+        runner: [macos-15, macos-latest]
+        toolchain: [Xcode, Command Line Tools]
     steps:
       - uses: actions/checkout@v5
-      - name: Swift version
-        run: swift --version
+      - name: Select the Command Line Tools
+        if: matrix.toolchain == 'Command Line Tools'
+        run: echo "DEVELOPER_DIR=/Library/Developer/CommandLineTools" >> "$GITHUB_ENV"
+      - name: Versions
+        run: |
+          {
+            echo "### ${{ matrix.runner }} · ${{ matrix.toolchain }}"
+            echo '```'
+            sw_vers
+            echo "Toolchain: $(xcode-select -p)${DEVELOPER_DIR:+ (DEVELOPER_DIR=$DEVELOPER_DIR)}"
+            swift --version 2>&1
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Tests
         run: ./test.sh
       - name: Build
