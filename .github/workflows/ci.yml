@@ -1,5 +1,5 @@
 # Runs the warning rule tests and a full universal build on pushes to main, pull requests,
-# manual runs and every Monday, the same way test.sh and build.sh run locally. Notifications,
+# manual runs and every Monday, and checks each version tag against Info.plist, the same way test.sh and build.sh run locally. Notifications,
 # alerts and screenshots need a logged-in Mac, so they aren't covered here.
 #
 # Each run builds on two images and two toolchains, so a toolchain change shows up without
@@ -12,6 +12,7 @@ name: build
 on:
   push:
     branches: [main]
+    tags: ["v*"]
   pull_request:
   workflow_dispatch:
   schedule:
@@ -28,8 +29,29 @@ permissions:
   contents: read
 
 jobs:
+  # A version tag only needs its number checked: main's own run already built that commit
+  version-tag:
+    name: Tag matches the app version
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: macos-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Compare the tag with Info.plist
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          version=$(/usr/libexec/PlistBuddy -c "Print CFBundleShortVersionString" Info.plist)
+          echo "Tag v$tag, Info.plist $version"
+          if [ "$tag" != "$version" ]; then
+            echo "::error title=Version mismatch::Tag v$tag doesn't match CFBundleShortVersionString $version in Info.plist"
+            exit 1
+          fi
+
   test-and-build:
     name: ${{ matrix.runner }} · ${{ matrix.toolchain }}
+    if: ${{ !startsWith(github.ref, 'refs/tags/') }}
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 15
     strategy:
