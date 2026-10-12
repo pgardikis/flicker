@@ -66,3 +66,20 @@ jobs:
           archs=$(lipo -archs build/Flicker.app/Contents/MacOS/Flicker)
           echo "Architectures: $archs"
           [[ " $archs " == *" arm64 "* && " $archs " == *" x86_64 "* ]]
+      # Catches a crash at startup, such as a SwiftUI or AppKit change on a newer macOS. The
+      # runner has a logged-in session, so the menu bar app can start; its panel isn't checked.
+      - name: Launch the app
+        run: |
+          build/Flicker.app/Contents/MacOS/Flicker > launch.log 2>&1 &
+          pid=$!
+          sleep 8
+          if kill -0 "$pid" 2>/dev/null; then
+            echo "Flicker is still running after 8 s"
+            kill "$pid"
+          else
+            status=0
+            wait "$pid" || status=$?
+            echo "Flicker exited during launch with status $status:"
+            cat launch.log
+            exit 1
+          fi
