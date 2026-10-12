@@ -17,9 +17,10 @@ on:
   schedule:
     - cron: "0 6 * * 1"
 
-# A newer push to the same pull request cancels its older run; every commit on main still finishes
+# A newer push to the same pull request cancels its older run. Everything else is grouped by
+# commit, so no run on main waits behind, or gets displaced by, another commit's run.
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ci-${{ github.event_name == 'pull_request' && github.ref || github.sha }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 # Only reads the code, so the job's token gets read access and nothing more
