@@ -38,7 +38,11 @@ jobs:
         runner: [macos-15, macos-latest]
         toolchain: [Xcode, Command Line Tools]
     steps:
-      - uses: actions/checkout@v5
+      # Pinned to a commit, since a tag can be moved; Dependabot proposes updates
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # The scripts don't need git access, so the token isn't left in .git/config
+          persist-credentials: false
       - name: Select the Command Line Tools
         if: matrix.toolchain == 'Command Line Tools'
         run: echo "DEVELOPER_DIR=/Library/Developer/CommandLineTools" >> "$GITHUB_ENV"
