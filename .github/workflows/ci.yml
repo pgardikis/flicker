@@ -134,5 +134,12 @@ jobs:
             wait "$pid" || status=$?
             echo "Flicker exited during launch with status $status:"
             cat launch.log
+            # macOS writes a crash report a moment after the crash; show where it happened
+            sleep 5
+            report=$(ls -t ~/Library/Logs/DiagnosticReports/Flicker*.ips 2>/dev/null | head -1 || true)
+            if [ -n "$report" ]; then
+              echo "Crash report: $report"
+              head -c 20000 "$report"
+            fi
             exit 1
           fi
