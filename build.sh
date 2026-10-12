@@ -17,7 +17,7 @@ rm -f "$BUILD"/compile-*.log
 ARCHES=(arm64 x86_64)
 PIDS=()
 for arch in "${ARCHES[@]}"; do
-  swiftc -O -parse-as-library -swift-version 6 -target "$arch-apple-macos14.0" \
+  swiftc -O -parse-as-library -swift-version 6 -target "$arch-apple-macos15.0" \
     Sources/*.swift -o "$BUILD/Flicker-$arch" > "$BUILD/compile-$arch.log" 2>&1 &
   PIDS+=($!)
 done

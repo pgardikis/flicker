@@ -13,7 +13,7 @@ sources=()
 for file in Sources/*.swift; do
   [[ "$file" == */FlickerApp.swift ]] || sources+=("$file")
 done
-swiftc -parse-as-library -swift-version 6 -target "$(uname -m)-apple-macos14.0" \
+swiftc -parse-as-library -swift-version 6 -target "$(uname -m)-apple-macos15.0" \
   -o build/render-panel "${sources[@]}" docs/images/render-panel.swift
 
 # US number formatting, so the cycle count reads 1,054 whatever the Mac's region
