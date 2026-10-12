@@ -1,0 +1,30 @@
+# Checks each pushed version tag against the app's version in Info.plist, so a tag can't be
+# pushed without bumping CFBundleShortVersionString. The tagged commit was already built and
+# tested by the build workflow when it reached main.
+name: version tag
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  version-tag:
+    name: Tag matches the app version
+    runs-on: macos-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Compare the tag with Info.plist
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          version=$(/usr/libexec/PlistBuddy -c "Print CFBundleShortVersionString" Info.plist)
+          echo "Tag v$tag, Info.plist $version"
+          if [ "$tag" != "$version" ]; then
+            echo "::error title=Version mismatch::Tag v$tag doesn't match CFBundleShortVersionString $version in Info.plist"
+            exit 1
+          fi

@@ -18,6 +18,7 @@ flicker/
 │   ├── SettingsView.swift         The Settings window and its tabs
 │   └── Settings.swift             Setting keys and defaults
 ├── .github/workflows/ci.yml       Tests, builds and launches on two macOS images and two toolchains
+├── .github/workflows/version-tag.yml  Checks each version tag against Info.plist
 ├── .github/dependabot.yml         Keeps the CI actions up to date
 ├── Tests/
 │   └── WarningRulesTests.swift    Scenarios that check the warning rules
