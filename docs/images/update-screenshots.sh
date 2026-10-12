@@ -9,8 +9,12 @@ cd "$(dirname "$0")/../.."
 mkdir -p build
 
 # Everything but the app's entry point, plus the renderer, which has its own
+sources=()
+for file in Sources/*.swift; do
+  [[ "$file" == */FlickerApp.swift ]] || sources+=("$file")
+done
 swiftc -parse-as-library -swift-version 6 -target "$(uname -m)-apple-macos14.0" \
-  -o build/render-panel $(ls Sources/*.swift | grep -v FlickerApp.swift) docs/images/render-panel.swift
+  -o build/render-panel "${sources[@]}" docs/images/render-panel.swift
 
 # US number formatting, so the cycle count reads 1,054 whatever the Mac's region
 build/render-panel docs/images -AppleLocale en_US

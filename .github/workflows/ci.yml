@@ -1,5 +1,6 @@
-# Runs the warning rule tests and a full universal build on pushes to main, pull requests,
-# manual runs and every Monday, and checks each version tag against Info.plist, the same way test.sh and build.sh run locally. Notifications,
+# Runs the warning rule tests and a full universal build, the same way test.sh and build.sh
+# run locally, on pushes to main, pull requests, manual runs and every Monday. It also checks
+# each version tag against Info.plist, and the shell scripts with ShellCheck. Notifications,
 # alerts and screenshots need a logged-in Mac, so they aren't covered here.
 #
 # Each run builds on two images and two toolchains, so a toolchain change shows up without
@@ -48,6 +49,19 @@ jobs:
             echo "::error title=Version mismatch::Tag v$tag doesn't match CFBundleShortVersionString $version in Info.plist"
             exit 1
           fi
+
+  # The scripts' quoting and error handling; ShellCheck comes preinstalled on Linux runners
+  shellcheck:
+    name: ShellCheck
+    if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Check the scripts
+        run: shellcheck --version && shellcheck build.sh test.sh docs/images/update-screenshots.sh
 
   test-and-build:
     name: ${{ matrix.runner }} · ${{ matrix.toolchain }}
