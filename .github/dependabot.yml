@@ -1,0 +1,7 @@
+# Proposes updates to the GitHub Actions the workflow uses, such as the pinned checkout commit
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
