@@ -29,6 +29,12 @@ concurrency:
 permissions:
   contents: read
 
+# bash -eo pipefail, so a failing command inside a pipeline (such as the versions piped into
+# tee) fails the step instead of being hidden
+defaults:
+  run:
+    shell: bash
+
 jobs:
   # The scripts' quoting and error handling; ShellCheck comes preinstalled on Linux runners
   shellcheck:

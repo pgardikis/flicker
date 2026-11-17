@@ -5,3 +5,6 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    # Titles its commits like the rest of the history, such as "build: bump actions/checkout…"
+    commit-message:
+      prefix: build
