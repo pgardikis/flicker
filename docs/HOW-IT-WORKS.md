@@ -57,7 +57,7 @@ The rules live in `WarningRules.decide`, which takes only numbers and flags, so 
 - **Faster time estimates**: macOS's own estimate takes about two minutes after unplugging or plugging in. Until then the time comes from the battery controller's `TimeRemaining` in the I/O Registry (`AppleSmartBattery`), which produces an estimate after about a minute, matching the one macOS shows later.
 - **Battery health**: the health rating, maximum capacity and cycle count come from `/usr/sbin/system_profiler SPPowerDataType -json`, read at launch and whenever the panel opens, so they match System Settings. IOKit only exposes raw mAh figures, and its own health rating can disagree (it may say Poor where System Settings says Normal).
 - **Warning text**: a low warning reads "Time to Charge" with "18% · about 1 hr 5 min left", a critical one "Critical Battery: 8%" with "About 12 min left. Plug in now." The time is written with units, since "1:05" on its own could pass for a clock time. Without a time estimate, that part is left out.
-- **Notifications**: sent with Apple's `UserNotifications` framework. Each warning reuses one identifier, so a reminder replaces the previous banner instead of stacking. The banner's Options menu offers *Mute for 1 Hour* and *Mute Until Plugged In*. Focus can hide them (see [Known limits](#known-limits)). If notification permission isn't granted, the app falls back to AppleScript's `display notification`; macOS delivers that banner as Script Editor's, with its name and icon, so it follows Script Editor's notification setting rather than Flicker's.
+- **Notifications**: sent with Apple's `UserNotifications` framework. Each warning reuses one identifier, so a reminder replaces the previous banner instead of stacking. The banner's Options menu offers *Mute for 1 Hour* and *Mute Until Plugged In*, and clicking the banner opens the panel. Focus can hide them (see [Known limits](#known-limits)). If notification permission isn't granted, the warning is shown as an alert instead, so it's never lost.
 - **Alerts**: a standard `NSAlert` warning dialog with the battery level drawn as a battery, a labeled tick at the warning level, and a *Mute for 1 Hour* button. A critical warning uses the critical alert style, ticks the critical level and has no mute button, since a mute doesn't hold back critical warnings.
 - **Sound**: played with `/usr/bin/afplay` instead of the notification sound. Notification sounds are capped by the system *alert volume*, while `afplay` follows your *output volume* and supports a boost multiplier.
 - **Settings**: stored in `UserDefaults` (`~/Library/Preferences/io.github.pgardikis.flicker.plist`).
@@ -105,7 +105,7 @@ The app is intentionally minimal: no network access, no root or admin privileges
 What it does on your Mac:
 
 - **Reads the battery** through IOKit and the I/O Registry (`AppleSmartBattery`), read-only.
-- **Runs three Apple tools**, always by fixed path: `/usr/sbin/system_profiler` for battery health, `/usr/bin/afplay` for the warning sound, and `/usr/bin/osascript` for the backup notification. The only inputs that vary are the checked sound name, the volume and the notification text.
+- **Runs two Apple tools**, always by fixed path: `/usr/sbin/system_profiler` for battery health and `/usr/bin/afplay` for the warning sound. The only inputs that vary are the checked sound name and the volume.
 - **Shows notifications and alerts.**
 - **Registers itself as a login item**, which you can turn off in Settings or System Settings.
 - **Stores its settings** in its own preferences file.
@@ -113,7 +113,6 @@ What it does on your Mac:
 ### Hardening in place
 
 - **Sound names are checked**: only names from `/System/Library/Sounds` are played, so a tampered setting can't point `afplay` at an arbitrary file.
-- **No AppleScript injection**: the backup notification passes the title and message to `osascript` as arguments (`on run argv`), never inserted into the script text.
 - **Hardened runtime**: blocks code injection into the running app.
 
 ### Known limits

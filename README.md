@@ -76,7 +76,7 @@ The menu bar icon fills with a "!" while the battery is low, and is crossed out 
 
 ## Troubleshooting
 
-**No notification appears.** Allow notifications for Flicker in System Settings → Notifications, then use **Test warning** in Settings.
+**Warnings come as alerts even with Style set to Banner.** Notifications are off for Flicker, so it uses an alert instead. Allow them in System Settings → Notifications, then use **Test warning** in Settings.
 
 **Nothing appears during Focus or Do Not Disturb.** Letting notifications through Focus needs an entitlement that only a paid Apple Developer Program membership can provide. Set **Style** to **Alert** instead: alerts aren't affected by Focus. Critical warnings are always alerts.
 

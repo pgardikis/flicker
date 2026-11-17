@@ -58,7 +58,7 @@ enum Notifier {
         } else if Settings.style == Settings.alertStyle {
             showAlert(title: title, message: message, percent: percent, level: threshold, critical: false)
         } else {
-            postNotification(title: title, message: message)
+            postNotification(title: title, message: message, percent: percent, threshold: threshold)
         }
     }
 
@@ -150,35 +150,26 @@ enum Notifier {
         }
     }
 
-    private static func postNotification(title: String, message: String) {
+    private static func postNotification(title: String, message: String, percent: Int, threshold: Int) {
         Task {
-            if await notificationsAllowed() {
-                let content = UNMutableNotificationContent()
-                content.title = title
-                content.body = message
-                content.categoryIdentifier = warningIdentifier
-                // A low battery is worth breaking through Focus / Do Not Disturb, but
-                // macOS honors this only with the com.apple.developer.usernotifications
-                // .time-sensitive entitlement, which needs a provisioning profile from a
-                // paid Developer ID. Ad-hoc signing can't have it: embedding it anyway
-                // makes AMFI refuse to launch the app. So this is a no-op on an ad-hoc
-                // build, kept for when the app is signed properly. Style = Alert gives a
-                // warning that Focus cannot suppress.
-                content.interruptionLevel = .timeSensitive
-                try? await UNUserNotificationCenter.current().add(UNNotificationRequest(identifier: warningIdentifier, content: content, trigger: nil))
-            } else {
-                // Permission denied or not yet granted: fall back to AppleScript notifications
-                let process = Process()
-                process.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
-                // Pass text as arguments, never interpolated into the script, to prevent AppleScript injection
-                process.arguments = [
-                    "-e", "on run argv",
-                    "-e", "display notification (item 1 of argv) with title (item 2 of argv)",
-                    "-e", "end run",
-                    message, title,
-                ]
-                try? process.run()
+            // Without permission a banner can't be shown, so the warning comes as an alert instead
+            guard await notificationsAllowed() else {
+                showAlert(title: title, message: message, percent: percent, level: threshold, critical: false)
+                return
             }
+            let content = UNMutableNotificationContent()
+            content.title = title
+            content.body = message
+            content.categoryIdentifier = warningIdentifier
+            // A low battery is worth breaking through Focus / Do Not Disturb, but
+            // macOS honors this only with the com.apple.developer.usernotifications
+            // .time-sensitive entitlement, which needs a provisioning profile from a
+            // paid Developer ID. Ad-hoc signing can't have it: embedding it anyway
+            // makes AMFI refuse to launch the app. So this is a no-op on an ad-hoc
+            // build, kept for when the app is signed properly. Style = Alert gives a
+            // warning that Focus cannot suppress.
+            content.interruptionLevel = .timeSensitive
+            try? await UNUserNotificationCenter.current().add(UNNotificationRequest(identifier: warningIdentifier, content: content, trigger: nil))
         }
     }
 }
