@@ -1,6 +1,7 @@
 # Checks each pushed version tag against the app's version in Info.plist, so a tag can't be
-# pushed without bumping CFBundleShortVersionString. The tagged commit was already built and
-# tested by the build workflow when it reached main.
+# pushed without bumping CFBundleShortVersionString, and against CHANGELOG.md, so every version
+# has its section. The tagged commit was already built and tested by the build workflow when it
+# reached main.
 name: version tag
 
 on:
@@ -10,21 +11,34 @@ on:
 permissions:
   contents: read
 
+# bash -eo pipefail, so a failing command inside a pipeline fails the step
+defaults:
+  run:
+    shell: bash
+
 jobs:
   version-tag:
     name: Tag matches the app version
-    runs-on: macos-latest
+    # Only reads two text files, so the small Linux runner does, without waiting for a Mac
+    runs-on: ubuntu-slim
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: Compare the tag with Info.plist
+      - name: Compare the tag with Info.plist and CHANGELOG.md
         run: |
           tag="${GITHUB_REF_NAME#v}"
-          version=$(/usr/libexec/PlistBuddy -c "Print CFBundleShortVersionString" Info.plist)
-          echo "Tag v$tag, Info.plist $version"
+          # Info.plist keeps each key and its value on one line; if that ever changes, this reads
+          # nothing and the comparison below fails rather than passing
+          version=$(sed -n 's|.*<key>CFBundleShortVersionString</key><string>\([^<]*\)</string>.*|\1|p' Info.plist)
+          echo "Tag v$tag, Info.plist ${version:-(not found)}"
           if [ "$tag" != "$version" ]; then
-            echo "::error title=Version mismatch::Tag v$tag doesn't match CFBundleShortVersionString $version in Info.plist"
+            echo "::error title=Version mismatch::Tag v$tag doesn't match CFBundleShortVersionString ${version:-(not found)} in Info.plist"
             exit 1
           fi
+          if ! grep -qF "## [$tag]" CHANGELOG.md; then
+            echo "::error title=Missing changelog entry::CHANGELOG.md has no \"## [$tag]\" section"
+            exit 1
+          fi
+          echo "CHANGELOG.md has a section for $tag"
