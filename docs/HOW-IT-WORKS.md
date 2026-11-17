@@ -8,8 +8,9 @@ The technical side of the app: how it reads the battery, how it decides when to 
 flicker/
 ├── Sources/
 │   ├── FlickerApp.swift           App entry, launch at login, notification setup
-│   ├── MenuBarLabel.swift         The menu bar icon and its states
-│   ├── DockIcon.swift             The optional Dock icon and opening the panel from it
+│   ├── StatusItem.swift           The menu bar icon and the panel under it
+│   ├── MenuBarLabel.swift         The menu bar icon's states
+│   ├── DockIcon.swift             The optional Dock icon
 │   ├── BatteryMonitor.swift       Reads the battery and acts on the warning rules
 │   ├── WarningRules.swift         The warning rules, as a pure function
 │   ├── Notifier.swift             Shows notifications and alerts, plays sounds
@@ -66,7 +67,8 @@ The rules live in `WarningRules.decide`, which takes only numbers and flags, so 
 - **Menu bar only by default**: `LSUIElement` in `Info.plist` hides the Dock icon and app menu.
 - **Version**: `CFBundleShortVersionString` in `Info.plist`, shown in the standard About window that the panel's **About** button opens, along with the copyright from `NSHumanReadableCopyright`. Each version has a matching annotated git tag, such as `v1.1` for a feature release or `v1.1.1` for a fix release.
 - **Settings tabs**: Warnings, Alert & Sound, and General, as toolbar tabs. The window takes the tab's name as its title and resizes to each tab, so even the tallest stays well within a small MacBook screen. The battery preview in Warnings redraws as the levels change, and VoiceOver reads it as text. The Banner and Alert pictures act as one picker for keyboard and VoiceOver users.
-- **Optional Dock icon**: *Show in Dock* switches the app's activation policy between regular and accessory, so the icon appears or disappears without a relaunch, along with the ⌘Tab entry and the app menu. SwiftUI's menu bar item has no API to open its panel, so a click on the Dock icon finds the app's own menu bar icon and clicks it. That relies on AppKit's private `NSStatusBarWindow` class name; if the icon can't be found, the click opens Settings instead, through the app menu's Settings… item.
+- **Optional Dock icon**: *Show in Dock* switches the app's activation policy between regular and accessory, so the icon appears or disappears without a relaunch, along with the ⌘Tab entry and the app menu. A click on the Dock icon opens the panel, as a click on a warning banner does.
+- **Menu bar icon and panel**: an AppKit status item with a panel that hosts the SwiftUI panel view, rather than SwiftUI's `MenuBarExtra`, which can't open its panel from code. The panel opens under the icon, follows its content's size, and closes on a click elsewhere or Esc, like a menu.
 
 ## What `build.sh` does
 

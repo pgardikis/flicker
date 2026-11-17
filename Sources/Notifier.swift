@@ -94,6 +94,8 @@ enum Notifier {
         switch identifier {
         case muteHourAction: BatteryMonitor.shared.mute(for: 60 * 60)
         case mutePluggedInAction: BatteryMonitor.shared.mute(for: nil)
+        // A click on the banner itself needs nothing here: macOS also sends the app a reopen
+        // event, which opens the panel (AppDelegate's applicationShouldHandleReopen)
         default: break
         }
     }

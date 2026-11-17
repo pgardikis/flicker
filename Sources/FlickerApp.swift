@@ -6,17 +6,9 @@ import UserNotifications
 struct FlickerApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @StateObject private var monitor = BatteryMonitor.shared
-    @AppStorage(Settings.showPercentKey) private var showPercent = Settings.defaultShowPercent
 
+    // The menu bar icon and panel are AppKit's (StatusItem), so this is the only scene
     var body: some Scene {
-        MenuBarExtra {
-            PanelView().environmentObject(monitor)
-        } label: {
-            MenuBarLabel(isLow: monitor.isLow, isMuted: monitor.isMuted,
-                         percent: showPercent ? monitor.percent : nil)
-        }
-        .menuBarExtraStyle(.window)
-
         SwiftUI.Settings {
             SettingsView().environmentObject(monitor)
         }
@@ -46,11 +38,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
         }
 
         BatteryMonitor.shared.start()
+        StatusItem.shared.start()
     }
 
-    /// Clicking the Dock icon opens the panel, as clicking the menu bar icon does.
+    /// Clicking the Dock icon, or a warning banner, opens the panel, as clicking the menu bar icon
+    /// does. macOS sends a reopen event for both.
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
-        DockIcon.openPanel()
+        StatusItem.shared.show()
         return false
     }
 
