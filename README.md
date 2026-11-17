@@ -82,7 +82,7 @@ The menu bar icon fills with a "!" while the battery is low, and is crossed out 
 
 **The sound is too quiet.** Raise **Volume** in Settings, and your speaker volume, since it's relative to that.
 
-**It doesn't start at login.** Check System Settings → General → Login Items, or turn **Launch at login** off and on in Settings.
+**It doesn't start at login.** If Settings says **Launch at login** needs your approval, click **Open Login Items** and allow Flicker. Otherwise turn the setting off and on.
 
 ## Uninstall
 

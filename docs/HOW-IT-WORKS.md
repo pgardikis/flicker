@@ -61,7 +61,7 @@ The rules live in `WarningRules.decide`, which takes only numbers and flags, so 
 - **Sound**: played with `/usr/bin/afplay` instead of the notification sound. Notification sounds are capped by the system *alert volume*, while `afplay` follows your *output volume* and supports a boost multiplier.
 - **Settings**: stored in `UserDefaults` (`~/Library/Preferences/io.github.pgardikis.flicker.plist`).
 - **Settings window placement**: it reopens where you left it, as macOS windows do, but only if that spot is on the screen whose menu bar you clicked. Otherwise (the first time, another display, or one that's been disconnected) it opens centered on that screen.
-- **Launch at login**: registered with `SMAppService.mainApp`.
+- **Launch at login**: registered with `SMAppService.mainApp`. If macOS holds it for approval, Settings says so and offers a button that opens Login Items.
 - **Single instance**: a second copy (say the one in `build/`) sees the running one by bundle ID and quits at launch, so there are never two icons or duplicate warnings.
 - **Menu bar only by default**: `LSUIElement` in `Info.plist` hides the Dock icon and app menu.
 - **Version**: `CFBundleShortVersionString` in `Info.plist`, shown in the standard About window that the panel's **About** button opens, along with the copyright from `NSHumanReadableCopyright`. Each version has a matching annotated git tag, such as `v1.1` for a feature release or `v1.1.1` for a fix release.

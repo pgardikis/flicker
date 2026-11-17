@@ -145,6 +145,13 @@ struct SettingsView: View {
                         Toggle("Launch at login", isOn: Binding(get: { loginItem.enabled }, set: { loginItem.set($0) }))
                         if let error = loginItem.error {
                             Text(error).font(.caption).foregroundStyle(.red)
+                        } else if loginItem.needsApproval {
+                            // Registered, but macOS waits for the user to allow it in Login Items
+                            LabeledContent {
+                                Button("Open Login Items") { SMAppService.openSystemSettingsLoginItems() }
+                            } label: {
+                                titled("Needs your approval", note: "Allow Flicker in Login Items to start it at login")
+                            }
                         }
                     }
                 }
@@ -200,11 +207,18 @@ struct SettingsView: View {
 /// Launch at login as the toggle shows it: what macOS reports, plus the last error.
 @MainActor
 private final class LoginItem: ObservableObject {
-    @Published private(set) var enabled = SMAppService.mainApp.status == .enabled
+    /// On once registered, including while macOS waits for approval, since the user asked for it;
+    /// `needsApproval` then says what's missing.
+    @Published private(set) var enabled = false
+    @Published private(set) var needsApproval = false
     @Published private(set) var error: String?
 
+    init() { reload() }
+
     func reload() {
-        enabled = SMAppService.mainApp.status == .enabled
+        let status = SMAppService.mainApp.status
+        enabled = status == .enabled || status == .requiresApproval
+        needsApproval = status == .requiresApproval
     }
 
     func set(_ on: Bool) {
