@@ -141,7 +141,7 @@ enum Notifier {
         alert.addButton(withTitle: "OK")
         // A mute doesn't hold back critical warnings, so the button would do nothing there
         if !critical {
-            alert.addButton(withTitle: "Mute 1 Hour")
+            alert.addButton(withTitle: "Mute for 1 Hour")
         }
         let response = alert.runModal()
         alert.window.orderOut(nil)
