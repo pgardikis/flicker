@@ -116,6 +116,8 @@ final class BatteryMonitor: ObservableObject {
         let timer = Timer(timeInterval: 60, repeats: true) { _ in
             MainActor.assumeIsolated { BatteryMonitor.shared.refresh() }
         }
+        // Slack lets macOS run it alongside other wake-ups, which saves energy on battery
+        timer.tolerance = 10
         RunLoop.main.add(timer, forMode: .common)
         self.timer = timer
 
@@ -271,6 +273,7 @@ final class BatteryMonitor: ObservableObject {
                 BatteryMonitor.shared.refresh()
             }
         }
+        timer.tolerance = 2
         RunLoop.main.add(timer, forMode: .common)
         estimateTimer = timer
     }
