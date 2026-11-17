@@ -92,6 +92,10 @@ The menu bar icon fills with a "!" while the battery is low, and is crossed out 
 4. Delete its settings: `defaults delete io.github.pgardikis.flicker`
 5. Delete the folder you cloned
 
+## Changelog
+
+What changed in each version is in [CHANGELOG.md](CHANGELOG.md).
+
 ## Technical details
 
 How the app reads the battery, how it decides when to warn, how `build.sh` builds it without Xcode, where it keeps files, and its security model are covered in [docs/HOW-IT-WORKS.md](docs/HOW-IT-WORKS.md).

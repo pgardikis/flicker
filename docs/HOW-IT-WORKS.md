@@ -30,6 +30,7 @@ flicker/
 ├── build.sh                       Build, sign and install script
 ├── test.sh                        Builds and runs the tests
 ├── README.md                      Install and usage
+├── CHANGELOG.md                   What changed in each version
 ├── AGENTS.md                      Instructions for AI coding agents
 ├── LICENSE                        MIT
 └── .gitignore

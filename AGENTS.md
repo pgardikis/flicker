@@ -30,7 +30,7 @@ A macOS 15+ menu bar app (an AppKit `NSStatusItem` with a SwiftUI panel and Sett
 
 ## Versions
 
-- The version is `CFBundleShortVersionString` in `Info.plist` (with `CFBundleVersion` as the build number), shown in the About window, with `NSHumanReadableCopyright` as its copyright line. Each version has an annotated git tag on the commit that sets it, `vX.Y` for features and `vX.Y.Z` for fixes only (the build number goes up by one each time); there are no GitHub Releases or binaries.
+- The version is `CFBundleShortVersionString` in `Info.plist` (with `CFBundleVersion` as the build number), shown in the About window, with `NSHumanReadableCopyright` as its copyright line. Each version has an annotated git tag on the commit that sets it, `vX.Y` for features and `vX.Y.Z` for fixes only (the build number goes up by one each time); there are no GitHub Releases or binaries. `CHANGELOG.md` gets a section for each version in the commit that bumps it: plain, user-facing entries under Added, Changed, Fixed and Removed, leaving out CI-only changes, with a compare link per version at the bottom.
 
 ## Constraints to preserve
 
