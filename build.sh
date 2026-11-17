@@ -3,6 +3,14 @@
 set -euo pipefail
 
 cd "$(dirname "$0")"
+
+# Stop on a mistyped option rather than quietly building without installing
+case "${1:-}" in
+  "" | --install) ;;
+  *) echo "Usage: $0 [--install]" >&2; exit 2 ;;
+esac
+[ $# -le 1 ] || { echo "Usage: $0 [--install]" >&2; exit 2; }
+
 BUILD=build
 APP="$BUILD/Flicker.app"
 

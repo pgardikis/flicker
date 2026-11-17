@@ -1,7 +1,8 @@
 # Runs the warning rule tests and a full universal build, the same way test.sh and build.sh
 # run locally, on pushes to main, pull requests, manual runs and every Monday. It also checks
-# the shell scripts with ShellCheck; version tags are checked by version-tag.yml. Notifications,
-# alerts and screenshots need a logged-in Mac, so they aren't covered here.
+# the shell scripts with ShellCheck and the workflows with actionlint; version tags are checked
+# by version-tag.yml. Notifications, alerts and screenshots need a logged-in Mac, so they
+# aren't covered here.
 #
 # Each run builds on two images and two toolchains, so a toolchain change shows up without
 # editing a version here: macos-latest moves to newer macOS by itself, and the Command Line
@@ -40,6 +41,22 @@ jobs:
           persist-credentials: false
       - name: Check the scripts
         run: shellcheck --version && shellcheck build.sh test.sh docs/images/update-screenshots.sh
+
+  # The workflows themselves, including their run: scripts, which actionlint passes to ShellCheck.
+  # Go comes preinstalled on Linux runners; Dependabot doesn't track this version, so bump it by hand.
+  actionlint:
+    name: actionlint
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Check the workflows
+        run: |
+          go install github.com/rhysd/actionlint/cmd/actionlint@v1.7.12
+          "$(go env GOPATH)/bin/actionlint" -version
+          "$(go env GOPATH)/bin/actionlint" -color
 
   test-and-build:
     name: ${{ matrix.runner }} · ${{ matrix.toolchain }}
@@ -113,7 +130,10 @@ jobs:
             cat launch.log
             # macOS writes a crash report a moment after the crash; show where it happened
             sleep 5
-            report=$(ls -t ~/Library/Logs/DiagnosticReports/Flicker*.ips 2>/dev/null | head -1 || true)
+            report=""
+            for file in ~/Library/Logs/DiagnosticReports/Flicker*.ips; do
+              if [ -e "$file" ] && { [ -z "$report" ] || [ "$file" -nt "$report" ]; }; then report=$file; fi
+            done
             if [ -n "$report" ]; then
               echo "Crash report: $report"
               head -c 20000 "$report"
