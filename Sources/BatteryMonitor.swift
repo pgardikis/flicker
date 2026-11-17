@@ -17,8 +17,8 @@ final class BatteryMonitor: ObservableObject {
     /// When muted warnings resume; `.distantFuture` means when the charger is connected.
     @Published private(set) var mutedUntil: Date?
 
-    /// Percentage at the last warning; nil once charging or back above the threshold.
-    private var lastWarned: Int?
+    /// The last warning; nil once charging or back above the threshold.
+    private var lastWarning: WarningRules.LastWarning?
     private var timer: Timer?
     private var muteTimer: Timer?
 
@@ -320,8 +320,8 @@ final class BatteryMonitor: ObservableObject {
         let critical = Settings.critical
         let decision = WarningRules.decide(percent: percent, onBattery: onBattery, threshold: threshold,
                                            critical: critical, remindEvery: Settings.remindEvery,
-                                           lastWarned: lastWarned, muted: isMuted)
-        lastWarned = decision.lastWarned
+                                           lastWarning: lastWarning, muted: isMuted)
+        lastWarning = decision.lastWarning
         guard decision.warn else { return }
         Notifier.warn(percent: percent, threshold: threshold, critical: decision.critical ? critical : nil,
                       minutesRemaining: minutesRemaining)

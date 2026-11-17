@@ -8,6 +8,9 @@ private struct Step {
     var percent: Int
     var onBattery = true
     var muted = false
+    /// Changes the setting from this step on, as moving it in Settings would.
+    var threshold: Int?
+    var critical: Int?
     /// nil: no warning; false: a low warning; true: a critical warning.
     var expect: Bool?
 }
@@ -59,8 +62,22 @@ private let scenarios: [Scenario] = [
     Scenario(name: "rising back to the threshold forgets the last warning", steps: [
         Step(percent: 35, expect: low), Step(percent: 40), Step(percent: 39, expect: low),
     ]),
-    Scenario(name: "lowering the threshold below the level stops warnings", threshold: 20, steps: [
-        Step(percent: 35), Step(percent: 25), Step(percent: 19, expect: low),
+    Scenario(name: "lowering the threshold below the level stops warnings", steps: [
+        Step(percent: 35, expect: low), Step(percent: 30, threshold: 20), Step(percent: 25),
+        Step(percent: 19, expect: low),
+    ]),
+    Scenario(name: "raising the critical level above the level warns critically", steps: [
+        Step(percent: 15, expect: low), Step(percent: 14, critical: 20, expect: critical),
+        Step(percent: 12), Step(percent: 9, expect: critical),
+    ]),
+    Scenario(name: "turning the critical level on below the level warns critically", critical: 0, remindEvery: 0, steps: [
+        Step(percent: 9, expect: low), Step(percent: 8, critical: 10, expect: critical), Step(percent: 4),
+    ]),
+    Scenario(name: "lowering the critical level warns again on entering the new one", critical: 20, remindEvery: 0, steps: [
+        Step(percent: 15, expect: critical), Step(percent: 14, critical: 10), Step(percent: 9, expect: critical),
+    ]),
+    Scenario(name: "a critical level at or above the threshold doesn't apply", threshold: 10, critical: 15, steps: [
+        Step(percent: 9, expect: low), Step(percent: 4, expect: low),
     ]),
 ]
 
@@ -69,14 +86,18 @@ enum WarningRulesTests {
     static func main() {
         var failures = 0
         for scenario in scenarios {
-            var lastWarned: Int?
+            var lastWarning: WarningRules.LastWarning?
+            var threshold = scenario.threshold, critical = scenario.critical
             var problems: [String] = []
             for step in scenario.steps {
+                threshold = step.threshold ?? threshold
+                critical = step.critical ?? critical
+                // The level the app passes in, as Settings.critical reads it
                 let decision = WarningRules.decide(
-                    percent: step.percent, onBattery: step.onBattery, threshold: scenario.threshold,
-                    critical: scenario.critical, remindEvery: scenario.remindEvery,
-                    lastWarned: lastWarned, muted: step.muted)
-                lastWarned = decision.lastWarned
+                    percent: step.percent, onBattery: step.onBattery, threshold: threshold,
+                    critical: WarningRules.effectiveCritical(critical, threshold: threshold),
+                    remindEvery: scenario.remindEvery, lastWarning: lastWarning, muted: step.muted)
+                lastWarning = decision.lastWarning
                 let got: Bool? = decision.warn ? decision.critical : nil
                 if got != step.expect {
                     problems.append("at \(step.percent)%: expected \(describe(step.expect)), got \(describe(got))")

@@ -25,7 +25,7 @@ struct SettingsView: View {
         TabView {
             page {
                 Section {
-                    LevelPreview(threshold: threshold, critical: critical < threshold ? critical : 0)
+                    LevelPreview(threshold: threshold, critical: effectiveCritical)
                         .padding(.vertical, 4)
 
                     LabeledContent("Warn below") {
@@ -72,7 +72,7 @@ struct SettingsView: View {
                         Menu("Send") {
                             Button("Low Battery") { monitor.sendTest() }
                             Button("Critical") { monitor.sendTest(critical: true) }
-                                .disabled(critical == 0 || critical >= threshold)
+                                .disabled(effectiveCritical == 0)
                         } primaryAction: {
                             monitor.sendTest()
                         }
@@ -110,7 +110,7 @@ struct SettingsView: View {
                     } label: {
                         titled("Critical sound", note: "Plays instead below the critical level")
                     }
-                    .disabled(critical == 0 || critical >= threshold)
+                    .disabled(effectiveCritical == 0)
 
                     // Stored as an afplay multiplier of the speaker volume; shown as a percentage of it
                     LabeledContent("Volume") {
@@ -182,7 +182,6 @@ struct SettingsView: View {
             .fixedSize(horizontal: false, vertical: true)
     }
 
-
     /// A row title with a gray note under it, as System Settings explains a setting in place.
     private func titled(_ title: String, note: String) -> some View {
         VStack(alignment: .leading, spacing: 2) {
@@ -190,6 +189,9 @@ struct SettingsView: View {
             Text(note).font(.caption).foregroundStyle(.secondary)
         }
     }
+
+    /// The critical level that applies, as Settings.critical reads it.
+    private var effectiveCritical: Int { WarningRules.effectiveCritical(critical, threshold: threshold) }
 
     /// What a critical warning plays, with "Same as Sound" resolved.
     private var resolvedCriticalSound: String { criticalSound == Settings.sameSound ? sound : criticalSound }

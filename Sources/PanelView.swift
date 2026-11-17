@@ -158,7 +158,7 @@ struct PanelView: View {
     }
 
     /// Matches Settings.critical: a level at or above the threshold can't apply.
-    private var effectiveCritical: Int { critical < threshold ? critical : 0 }
+    private var effectiveCritical: Int { WarningRules.effectiveCritical(critical, threshold: threshold) }
 
     /// The standard About window: icon, name, version and copyright from Info.plist.
     private func showAbout() {

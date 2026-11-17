@@ -48,8 +48,7 @@ enum Settings {
     static var threshold: Int { min(max(UserDefaults.standard.integer(forKey: thresholdKey), 5), 95) }
     /// 0 when off, or when it isn't below the threshold and so can't apply.
     static var critical: Int {
-        let critical = UserDefaults.standard.integer(forKey: criticalKey)
-        return critical < threshold ? critical : 0
+        WarningRules.effectiveCritical(UserDefaults.standard.integer(forKey: criticalKey), threshold: threshold)
     }
     static var remindEvery: Int { UserDefaults.standard.integer(forKey: remindEveryKey) }
     static var style: String { UserDefaults.standard.string(forKey: styleKey) ?? defaultStyle }
